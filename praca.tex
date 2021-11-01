@@ -1,16 +1,11 @@
-% \documentclass[12pt]{aghdpl}
-\documentclass[language=en,11pt]{aghdpl}  % praca w języku angielskim
+\documentclass[language=en,11pt]{aghdpl}
 
-%---------------------------------------------------------------------------
 
 \author{Aleksander Nagaj}
 \shortauthor{A. Nagaj}
 
-%\titlePL{Przygotowanie bardzo długiej i pasjonującej pracy dyplomowej w~systemie~\LaTeX}
-\titleEN{Preparation of a very long and fascinating bachelor or master thesis in \LaTeX}
-
 %\titlePL{Przygotowanie pracy dyplomowej w~systemie~\LaTeX}
-\titleEN{}
+\titleEN{Vision system for controlling the route of an autonomous boat using machine learning methods.}
 
 
 %\shorttitlePL{Przygotowanie pracy dyplomowej w~systemie \LaTeX} % skrócona wersja tytułu jeśli jest bardzo długi
@@ -25,36 +20,36 @@
 %\thesistype{Praca dyplomowa}
 \thesistype{Bachelor of Science Thesis}
 
-%\supervisor{dr Paweł Kłeczek}
 \supervisor{Maciej Rosół, PhD}
 
-%\degreeprogramme{Automatyka i Robotyka}
 \degreeprogramme{Automatics and Robotics}
 
 \date{2021}
 
-%\department{Katedra Informatyki Stosowanej}
+\renewcommand{\contentsname}{Table of Contents}
+
 \department{Department of Applied Computer Science}
 
-%\faculty{Wydział Elektrotechniki, Automatyki, Informatyki i Inżynierii Biomedycznej}
 \faculty{Faculty of Electrical Engineering, Automatics, Computer Science and Biomedical Engineering}
 
-\acknowledgements{Serdecznie dziękuję \dots tu ciąg dalszych podziękowań np. dla promotora, żony, sąsiada itp.}
+\acknowledgements{For Em}
 
 
 \begin{document}
+    % \setcounter{page}{1}
 
 	\titlepages
 	\RedefinePlainStyle
+	
+    \include{chapters/1_abstract}
 	
 	\setcounter{tocdepth}{2}
 	\tableofcontents
 	\clearpage
 	
-	\include{rozdzial1}
 	\include{rozdzial2}
-	\include{rozdzial3}
-	\include{tests}
+% 	\include{rozdzial3}
+% 	\include{tests}
 	
 	% itd.
 	% \appendix

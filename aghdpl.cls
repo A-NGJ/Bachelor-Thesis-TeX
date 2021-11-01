@@ -22,7 +22,7 @@
 
 \DeclareOption{pdflatex}{\pdflatextrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{report}} 
-\ProcessOptions\LoadClass[a4paper,twoside,openright]{report} 
+\ProcessOptions\LoadClass[a4paper, twoside, openright]{report} 
 
 \RequirePackage{xstring}
 
@@ -41,10 +41,7 @@
 
 % Lista wszystkich języków stanowiących języki pozycji bibliograficznych użytych w pracy.
 % (Zgodnie z zasadami tworzenia bibliografii każda pozycja powinna zostać utworzona zgodnie z zasadami języka, w którym dana publikacja została napisana.)
-\RequirePackage[english,polish]{babel}
-
-% Użyj polskiego łamania wyrazów (zamiast domyślnego angielskiego).
-\RequirePackage{polski}
+\RequirePackage[english]
 
 % Użyj kodowania UTF-8.
 \RequirePackage[utf8]{inputenc}
@@ -71,11 +68,11 @@
 
 \RequirePackage{geometry}
 
-\geometry{lmargin=30mm, rmargin=20mm, tmargin=30mm, bmargin=30mm, foot=10mm, head=10mm}  % rozmiary marginesów i nagłówka/stopki
+\geometry{lmargin=20mm, rmargin=20mm, tmargin=30mm, bmargin=30mm, foot=10mm, head=10mm}  % rozmiary marginesów i nagłówka/stopki
 \linespread{1.25}  % interlinia
 \renewcommand{\labelitemi}{--}  % znak wypunktowania użyty w liście wypunktowania
 
-\RequirePackage[all,defaultlines=2]{nowidow} % Kontrola sierot i wdów - działa lepiej niż \widowpenalty i \clubpenalty
+\RequirePackage[all, defaultlines=2]{nowidow} % Kontrola sierot i wdów - działa lepiej niż \widowpenalty i \clubpenalty
 \brokenpenalty=10000\relax
 
 % =============================================================================
@@ -175,13 +172,11 @@
 	\centerline{\small\sffamily Kraków, \@date}
 	
 	\clearpage
-	\thispagestyle{empty} 
+	\titlepage
 	
 	% Strona z podziękowaniami.
 	{~}\vspace{20mm}
 	
-	\clearpage
-	\titlepage
 	
 	\vspace*{15cm} \vfill
 	\begin{flushright} 
@@ -192,11 +187,7 @@
 	
 	\clearpage
 	\thispagestyle{empty}
-	
-	~ \newpage
-	
-	% Obecna strona będzie mieć nr 5.
-	\setcounter{page}{5}
+
 }
 
 
@@ -404,8 +395,8 @@
 }
 
 \AtBeginDocument{
-	\renewcommand{\tablename}{Tabela}
-	\renewcommand{\figurename}{Rys.}
+	\renewcommand{\tablename}{Table}
+	\renewcommand{\figurename}{Fig.}
 }
 
 % =============================================================================
