@@ -61,6 +61,7 @@
 \RequirePackage{subcaption}
 \RequirePackage{enumerate}
 \RequirePackage{enumitem}
+\RequirePackage{float}
 
 % =============================================================================
 % SEC:   Ustawienia związane z formatowaniem tekstu
