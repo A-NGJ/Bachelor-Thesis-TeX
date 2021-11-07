@@ -12,10 +12,10 @@ RN nowadays is well-known due to algorithm which used to solve different games a
 The DQN agent designed by \emph{Google Deep Mind} was able to play 49 different Atari 2600 games (\ref{fig:Atari2600}). However, the most famous one is probably the \emph{AlphaGo} \cite{AlphaGO}  and \emph{AlphaGo Zero}. AlphaGo was trained on countless human games achieving robust performance, but it was not sufficient for the researchers. They let their new agent trained from scratch - AlphaGo Zero to play with itself and eventually beat AlphaGo 100-0. 
 
 \begin{figure}[h]
-\includegraphics[width=14cm]{img/Atari2600.png}
-\caption{Reinforcement Learning model vs human-level performance in the Atari 2600 environment \cite{DQNAtari}}
-\label{fig:Atari2600}
-\centering
+    \includegraphics[width=12cm]{img/Atari2600.png}
+    \centering
+    \caption{Reinforcement Learning model vs human-level performance in the Atari 2600 environment \cite{DQNAtari}}
+    \label{fig:Atari2600}
 \end{figure}
 
 \subsection{Robotics}
@@ -26,7 +26,8 @@ As stated in survey \cite{RNSurvey}, \emph{reinforcement learning offers to a ro
 \label{sub:intro-personalized-reccomendations}
 News recommendation tends to be challenging due to the fact that most of the users easily get bored. Even if one clicks at the article, there is a low likelihood that it will be read to the end. Therefore Click Through Rate, which is used by many algorithms, standalone is an ineffective indicator. In order to improve the quality of recommendations and address this issue, the DQN was designed and described in \emph{DRN: A Deep Reinforcement Learning Framework for News Recommendation} \cite{DRNNewsRecommendaiton}. This method uses multiple features to determine what will be displayed to the user.
 
-\section{Classification of Reinforcement Learning Methods}
+\newpage
+\section{Reinforcement Learning Methods Taxonomy}
 \label{sec:classification-of-reinforcement-learning-methods}
 
 \subsection{Policy}
@@ -56,7 +57,7 @@ On the other hand, an on-policy algorithm evaluates which action agent should ta
 \subsection{Model}
 \label{sub:model}
 
-Model is in simple terms the behaviour of an environment. Based on whether the agent needs to know such model to determine a policy RN algorithms can be classified to two groups.
+Model is in simple terms the behaviour of an environment. Based on whether the agent needs to know such model to determine a policy RN algorithms can be classified to two groups. There are two main types of networks regarding the model.
 
 \subsubsection*{Model-Free}
 \label{sub2:model-free}
@@ -66,11 +67,10 @@ A model-free algorithm does not have to learn the model to evaluate its policy. 
 \subsubsection*{Model-Based}
 \label{sub2:model-based}
 
-A model based algorithm must know the model of an environment before finding an optimal policy. \mbox{AlphaGO} (\ref{sub:intro-games}) is an perfect example.
+A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (\ref{sub:intro-games}) is an perfect example.
 
 \subsection{Base}
+\label{sub:base}
 
-\subsubsection*{Value-Based}
-
-\subsubsection*{Policy-Based}
-
+This \textbf{Value-based} network does not store explicitly the policy. Instead, it keeps track only of a value function. The policy can be derived directly from the value function, which means taking an action which corresponds to the best value.
+The opposite approach is taken in \textbf{Policy-based} methods, where the representation of the policy $\pi(s)$ is created explicitly and kept in memory during the learning process. 
