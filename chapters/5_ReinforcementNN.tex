@@ -1,0 +1,99 @@
+\chapter{Reinforcement Learning}
+\label{cha:reinforcement-learning}
+
+Having discussed ANN and CNN it is high time to introduce third and last component used in the vision system for autonomous boat control. Reinforcement learning is a machine learning training method based on reward-penalty system. The agent is put in the environment with a defined \textbf{action space} and \textbf{state space} \ref{sub:mdp}. The agent is rewarded for taking an action which leads closer to desired state and punished with a negative reward for an undesired behaviour. Value of every action is remembered. This programs the agent to seek a long-term and maximum overall reward in order to achieve an optimal solution.
+
+\section{Reinforcement Learning Methods Taxonomy}
+\label{sec:classification-of-reinforcement-learning-methods}
+
+Before diving into details of Q-learning algorithm used in the vision system project, let us give a brief overview over different types of RN methods. The notation introduced in this section is used in further parts of the paper.
+
+\subsection{Policy}
+\label{sub:policy}
+
+The policy is a strategy used by the agent to achieve desired goal. It dictates which action is going to be taken based on agent's state and the environment. Formally the policy $\pi(s)$, $s\in{S}$, is defined in terms of the \emph{Markov Decision Process} \ref{sub:mdp} to which it refers. 
+
+\subsubsection*{Off-Policy}
+\label{sub2:off-poicy}
+
+% TODO: Q-value reference
+% TODO: Q-learning referece
+In an off-policy algorithm the agent state and the action that will be taken is evaluated regardless of the currently followed policy $\pi$. Q-learning is an example. It updates its Q-values using Q-value of the next state $s'$ and the greedy action $a'$. That is, the return for state-action pairs is estimated assuming that a greedy policy was followed even though the agent is not following the greedy policy.
+
+\subsubsection*{On-Policy}
+\label{sub2:on-policy}
+
+On the other hand, an on-policy algorithm evaluates which action agent should take with respect to the policy it follows. For example, SARSA is an algorithm which updates its Q-values using Q-value of the next state $s'$ and the current policy's action $a''$. The return for state-action pairs is estimated assuming that the current policy is followed in the next state.
+
+\subsection{Model}
+\label{sub:model}
+
+Model is in simple terms the behaviour of an environment. Based on whether the agent needs to know such model to determine a policy RN algorithms can be classified to two groups. There are two main types of networks regarding the model.
+
+\subsubsection*{Model-Free}
+\label{sub2:model-free}
+
+A model-free algorithm does not have to learn the model to evaluate its policy. One of the most common examples is \emph{Q-learning}, but such approach is also used in \emph{Actor-critic} or \emph{Policy gradient} methods which search directly over policy space to find policies that result in a better reward from the environment.
+
+\subsubsection*{Model-Based}
+\label{sub2:model-based}
+
+A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (\ref{sub:intro-games}) is an perfect example.
+
+\subsection{Base}
+\label{sub:base}
+
+This \textbf{Value-based} network does not store explicitly the policy. Instead, it keeps track only of a value function. The policy can be derived directly from the value function, which means taking an action which corresponds to the best value.
+The opposite approach is taken in \textbf{Policy-based} methods, where the representation of the policy $\pi(s)$ is created explicitly and kept in memory during the learning process. 
+
+\section{Q-learning}
+\label{sec:q-learn}
+
+In a classical reinforcement learning action $a$ the agent should take is determined by the value $V(s')$ of the next state. Q-learning approach focuses on the quality of the action $Q(s, a)$ instead. It is an off-policy, model-free algorithm used in many reinforcement learning solutions.
+
+\subsection{Bellman Equation}
+\label{sub:bellman-eq}
+
+This is the underlying principle of the Q-learning algorithm, first introduced by \emph{Richard Bellman} \cite{Bellman:DynamicProgramming}.
+
+\begin{equation}
+    V(s) = \max_a\left(R_a(s, s') + \gamma V(s') \right)
+\label{eq:bellman}
+\end{equation}
+
+Where $V(s)$ is the value of a given state, $R(s, a)$ is a reward for taking an action $a$ in a state $s$ and $\gamma$ is a discount factor. The equation is straightforward, all it tells that a value of a given state is assessed based on an action for which the sum of a reward and discounted value of the next state is maximal. The assumption is that the value of the next state must be known. To put it in simpler terms, an agent which wants to know how good (or bad) its current state is, looks around for opportunities. If there is a happy place around, then the value of current state is high. If you were one step from reaching the top of the Mount Everest, you would perhaps be more excited than if you were looking at it on a postcard.
+
+\subsection{Markov Decision Process}
+\label{sub:mdp}
+
+Markov Decision Process can be expressed as a tuple $(S, A, P_a, R_a)$, as stated in \emph{Markov Decision Processes: Concepts and Algorithms} \cite{Otterlo2012MarkovDP}:
+
+\begin{itemize}
+    \item $S$ is a state space, a set of all possible states of the agents,
+    \item $A$ is an action space, a set of all the behaviors agent can take,
+    \item $P_a(s, s') = P(s_{t+1} = s' | s_t = s, a_t = a)$ is the probability that the outcome of an action $a$ taken in state $s$ will be state $s'$ at time $t+1$,
+    \item $R_a(s, s')$ is the reward received after transition from state $s$ to state $s'$ after taking action $a$.
+\end{itemize}
+
+The key concept behind MDP is that the outcome of an action is independent to previous actions and states. It only depends on a current state. The current state $s$ must give sufficient information to make an optimal decision. A policy $\pi^{*}(s)$ which for every state $s$ results in an optimal decision is called \emph{optimal policy} and can be defined as 
+
+\begin{equation}
+    V^{\pi^{*}}(s) \ge V^{\pi}(s)
+\end{equation}
+
+for every $s \in S$ and all policies $\pi$.
+
+In realty, when agent takes a particular action it does not ensure that it will end in a desired state. Although it has control over all actions, there environment can still affect them in a unexpected way. Taking a boat as an example, propellers speed may be set to make it turn right, but a sudden wave might move the boat left anyway. That is why the transition in MDP is expressed in terms of probability. Having that in mind, we can write the Bellman equation (\ref{eq:bellman}) in terms of \emph{expected value}:
+
+\begin{equation}
+    V(s) = \max_a \left(R_a(s, s') + \gamma \sum_{s'} P_a(s, s')V(s') \right)
+\end{equation}
+
+
+\subsection{Q-value}
+\label{sub:q-val}
+
+%TODO: https://www.cs.vu.nl/~annette/SIKS2009/material/SIKS-RLIntro.pdf
+
+\section{Deep Q-learning}
+\label{sec:deep-q-learn}
