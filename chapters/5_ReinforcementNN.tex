@@ -86,14 +86,100 @@ for every $s \in S$ and all policies $\pi$.
 In realty, when agent takes a particular action it does not ensure that it will end in a desired state. Although it has control over all actions, there environment can still affect them in a unexpected way. Taking a boat as an example, propellers speed may be set to make it turn right, but a sudden wave might move the boat left anyway. That is why the transition in MDP is expressed in terms of probability. Having that in mind, we can write the Bellman equation (\ref{eq:bellman}) in terms of \emph{expected value}:
 
 \begin{equation}
-    V(s) = \max_a \left(R_a(s, s') + \gamma \sum_{s'} P_a(s, s')V(s') \right)
+    V^{*}(s) = \max_a \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma V^{*}(s') \right)
+\label{eq:state-value}
 \end{equation}
 
+To select an optimal action given the optimal value function $V^{*}$:
+
+\begin{equation}
+    \pi^{*}(s) = arg \max_a \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma V^{*}(s') \right)
+\label{eq:state-value-policy}
+\end{equation}
+
+This is a \emph{greedy policy}, since the best action is always chosen based on the value function $V$.
 
 \subsection{Q-value}
 \label{sub:q-val}
 
-%TODO: https://www.cs.vu.nl/~annette/SIKS2009/material/SIKS-RLIntro.pdf
+Q-value can be described as \emph{quality of the action} $a$. The state-action value function $Q$ becomes an decision making indicator instead of state value function $V$. This slight change has considerable consequences. Since there is no longer need to compute the value of the next state, an algorithm becomes independent to the model. That is, the agent can take a step without prior knowledge of the properties of the incoming state. The action-state equation analogous to \ref{eq:state-value}:
+
+\begin{equation}
+    Q^{*}(s, a) = \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma \max_{a'} Q^{*}(s', a') \right)
+\label{eq:q-value}
+\end{equation}
+
+The relation between $Q$ and $V$ is given as following:
+
+\begin{equation}
+    V^{*} = \max_a \left(Q^{*} (s, a)\right)
+\end{equation}
+
+and analogously to \ref{eq:state-value-policy}
+
+\begin{equation}
+    \pi^{*}(s) = arg \max_a Q^{*}(s, a)
+\end{equation}
+
+The above equation states that the best action is the one that has the highest return from possible states resulting from taking that action.
+In other words, the agent chooses an action which leads to a state which gives the most opportunities to progress. It is like deciding between universities to apply for, assuming you are eligible for admission to every, you would perhaps choose the most prestigious one.
+
+\subsection{Exploration-exploitation}
+\label{sub:exploration-exploitation}
+
+The ultimate goal of a Q-learn algorithm is to obtain the optimal policy $\pi^{*}$, but the difficulty is that the model of the environment is unknown. In order to collect missing pieces of information, the agent has to \emph{explore} what is the universe that it has been put into. As interesting as it may be, exploration itself will not bring the agent closer towards finding a desired state $s$ and thus learning the optimal policy. The only way to increase a total reward is to \emph{exploit} the current knowledge about best possible actions. However, there may a better, yet unknown action which only can be discovered in the exploration process. Finding the balance between \emph{exploration} and \emph{exploitation} is crucial for every RN algorithm.
+
+The most rudimentary strategy is \emph{$\epsilon$-greedy} policy. Given the $\epsilon \in [0, 1]$, the agent takes its current best action with a probability $(1 - \epsilon)$ and a randomly selected action $a \in A$ with probability $\epsilon$. There are obviously more sophisticated strategies to balance between exploration and exploitation, but the Deep-Q-learning \ref{} algorithm used in the final project is based on this one. Therefore there is no need to introduce additional methods.
+
+\subsection{Temporal Difference Learning}
+\label{sub:temporal-difference-learning}
+
+This is a heart of Q-learning algorithm. One could think of two approaches of finding the intermediate values $Q(s, a)$ which eventually lead to desired state $s$. First possibility is to wait until the end of an episode and reward or punish actions taken along the path. For a complex model it would require considerable amount of memory. Luckily there exists a more efficient way. Instead of sitting patiently until the very end and then act, the q-value can be updated at every step using a \emph{temporal difference}. It is adjusted based on the reward and the estimated discounted value of the next state.
+
+Before diving into mathematics, let us simplify equation \ref{eq:q-value} using an alias,
+
+\begin{equation}
+    Q(s, a) = \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma \max_{a'} Q(s', a') \right)
+    \equiv
+    R_a(s, s') + \gamma \max_{a'} Q(s', a')
+\label{eq:q-learn-alias}
+\end{equation}
+
+and introduce a virtual timer $t$ representing each iteration the agent acts.
+
+Before performing an action, there is some $Q(s, a)$ value known for a transition between current state $s$ and the next $s'$. The agent then performs the action and it turns out that the outcome q-value equals \[R_a(s, s') + \gamma \max_{a'} Q(s', a')\]
+An cautious reader may notice that it is simply an above equation \ref{eq:q-learn-alias}. The detail that matters is time. First one is just an expectation and the latter a reality. Temporal difference is simply a neat way to express it,
+
+\begin{equation}
+    TD = R_a(s, s') + \gamma \max_{a'} Q_{t}(s', a') - Q_{t-1}(s, a)
+\label{eq:temporal-difference}
+\end{equation}
+
+It is directly used to update the $Q_t(s, a)$ after taking an action,
+
+\begin{equation}
+    Q_t(s, a) = Q_{t-1} + \alpha TD_t(s, a)
+\end{equation}
+
+The $\alpha$ factor, called a \emph{learning rate}, is used because do not live in a perfect world, unless you are reading it in a distant future where all diseases are gone. The action taken might have been with some likelihood unexpected or random because of stochastic environment. Therefore, instead of replacing the old $Q_{t-1}$ with the new $Q_t(s, a)$ we update it with a pace controlled by $\alpha$.
+
+\vspave{.5cm}
+
+Finally, the Q-learning algorithm can be written as following,
+
+\begin{lstlisting}[language=Python]
+    gamma = x
+    alpha = y
+    init_q_values()
+    for e in episodes:
+        s = starting_state
+        while s != final_state:
+            action = choose_action()
+            new_state, reward = take_action(action)
+            Q(s, a) = Q(s, a) + alpha*TD
+            s = new_state
+\end{lstlisting}
 
 \section{Deep Q-learning}
 \label{sec:deep-q-learn}
+
