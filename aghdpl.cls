@@ -22,7 +22,7 @@
 
 \DeclareOption{pdflatex}{\pdflatextrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{report}} 
-\ProcessOptions\LoadClass[a4paper, twoside, openright]{report} 
+\ProcessOptions\LoadClass[a4paper, twoside, openany]{report} 
 
 \RequirePackage{xstring}
 
