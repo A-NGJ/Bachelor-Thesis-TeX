@@ -1,0 +1,157 @@
+\chapter{Vision System Project}
+\label{cha:vision-system-project}
+
+Deep learning methods has reached in the recent years state-of-the-art results in many applications, e.g. image recognition, speech recognition and synthesis, natural language processing and reinforcement learning. Having in mind the results described in \ref{sub:intro-games} and the outstanding performance of the application of DQN in teaching Autonomous Driving Agent \cite{2020DuckieTown} it appeared that Autonomous Floating Agent (Boat) would be a natural step. The idea was to create a vision system using CNN (\ref{cha:conv}) + RNN (\ref{cha:reinforcement-learning}) + DNN (\ref{cha:dl}) which would be capable of routing the boat between buoys in the simple environment. Due to time and hardware limitations it was impossible test it in the real world. However, the results are promising enough to suppose that with further development it would be possible to use proposed vision system on a physical boat.
+
+\section{Simulation Environment}
+\label{sec:simulation-env}
+
+Before any algorithm begin to train an autonomous agent a virtual reality must be created. Virtual for us of course, for the agent it is the only world that is known. The purpose was to find simple enough environment to minimise external factors which could affect the vision system performance and simultaneously complex enough to benchmark it. Additionally, simulation had to be compatible with \emph{Robot Operating System} (ROS) and \emph{OpenAI Gym} used to train proposed DQN. 
+
+\subsection{Gazebo}
+\label{sub:gazebo}
+
+The simulation environment chosen for the project was \emph{Gazebo 11}\footnote{https://gazebosim.org/} - an open source robot 3D simulator.
+It is used for designing robots, offering ROS integration, performing regression testing with realistic scenarios and, what is most important, testing robotics algorithms. Needless to say, it perfectly satisfies project's prerequisites. Since the main purpose of the Thesis was the vision system, not the simulation environment itself, there has been chosen a \textbf{Virtual RobotX} \cite{bingham19toward} project as a starting point. It is an simulation environment, designed in coordination with RobotX\footnote{https://defenceinnovationnetwork.com/robotx-challenge-2022/} challenge organizers - the international, university-level maritime autonomous robotic systems competition. However, it required several modifications.
+
+First of all, the environment must have followed simplicity principle, hence the \emph{Sydney regatta} map was used. All obstacles were replaced with buoys which created a route for the boat, as in the following image. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{}
+    \caption{Sydney regatta map with prepared track}
+    \label{fig:sydney-regatta-map}
+\end{figure}
+
+The buoys create a curve to force an autonomous agent to adjust to changeable conditions. If the track was straight, the environment would present significantly less challenge for the Deep Reinforcement Network. It could possibly neglect all the propellers speed except the "float forward" instruction regardless of what images are perceived by cameras. What is more, left-side buoys are green coloured and of slightly different shape than right-side coloured red. This makes it easier for the CNN to recognize correct patterns and subsequently increases the entire vision system performance.
+
+\subsubsection*{Sensors}
+\label{sub2:sensors}
+
+The boat running on the ROS is equipped with multiple sensors, but for the purpose of reinforcement learning the following were used:
+\begin{itemize}
+    \item Front right camera,
+    \item front left camera,
+    \item odometry.
+
+    Whereas first two are self-explanatory, odometry is the use of motion sensors to determine the robot's change in the position relative to some known position. In other words, it allows to retrieve $(x, y, z)$ coordinates of the boat. This in turn allows to control whether the boat is within the track or if it reached the desired position.  
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{}
+    \caption{View from boat's camera}
+    \label{fig:camera-view}
+\end{figure}
+
+\subsection{OpenAI Gym}
+\label{sub:openai-gym}
+
+OpenAI Gym\footnote{https://gym.openai.com/} is a toolkit for developing and comparing reinforcement learning algorithms. It supports multiple environments, from walking agent to playing games like \emph{Pong} or \emph{Pinball}. Running simulation with gym is straightforward. At every step an agent chooses an action, then takes a step in the environment. In return we receive observation for the state $s'$, reward $R_a(s, s')$ and \emph{done} flag, which is a boolean value.
+
+\begin{lstlisting}[language=Python, caption={Example gym environment simulation}, captionpos=b]
+    env = gym.make('My-env')
+    observaton = env.reset()
+    for _ in range(steps):
+        action = agent.chose_action()
+        observation, reward, done = env.step(action)
+        if done:
+            observation = env.reset()
+    env.close()
+\end{lstlisting}
+
+For our use case the custom environment was created using Gazebo and ROS. The python script communicates with boat robot through ROS topics which then performs an action and sends back the new observation through another ROS topic. The reward is computed after each step based on odometry which is also responsible for controlling agent's position.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{||c c c c||}
+        \hline
+        Topic & ROS Boat &  OpenAI Env & Description \\
+        \hline\hline
+        left\_thrust\_cmd & S & P & Left thrust \\
+        right\_thrust\_cmd & S & P & Right trust \\
+        front\_right\_camera & P & S & Right camera image \\
+        front\_left\_camera & P & S & Left camera image \\
+        odom & P & S & Odometry \\
+        \hline
+    \end{tabular}
+    \caption{List of ROS topics used in custom OpenAI environment.\newline P - publisher, S - subscriber}
+    \label{tab:ros-topics}
+\end{table}
+
+\subsubsection*{State space}
+\label{sub2:state-space}
+
+Despite the boat being placed in a relatively spacious map, its \textbf{state space} was limited to rectangle of shape $\left( (x_{max} - x_{min}) \times (y_{max} - y_{min})\right)$. Furthermore, the boat can only move between left and right buoys of the same pair, which have positions $(x^i_l, y^i_l)$ and $(x^i_r, y^i_r)$ where $i$ is the buoy pair's index, similarly to layer numbering in ANN. Note that $x^i_l = x^i_r = x^i$, because the directions are aligned with coordinate system. When the agent passes pair of buoys
+
+\begin{equation}
+    x^i - \psi \leq x_{agent} \leq x^i + \psi
+\end{equation}
+
+the constraints must be followed,
+
+\begin{equation}
+    y^i_l + \psi \leq y_{agent} \leq y^i_r + \psi
+\end{equation}
+
+where $\psi$ is an offset. Otherwise the boat is considered off-track, which is an illegal space, and \emph{done} flag is set \emph{true} . Additionally, maximum distance from desired point has been introduced, which cannot be greater than the largest distance of a state space. The distance is calculated as simple \emph{euclidean distance}
+
+\begin{equation}
+    d = \sqrt{(x_1 - x_2)^2 + (y_1-y_2)^2}
+\end{equation}
+
+The goal of the simulation is to reach the desired point. If $(x_{agent}, y_{agent}) = (x_{desired}, y_{desired})$ then simulation episode finishes and \emph{done} is set \emph{true}. 
+
+\subsubsection*{Action Space}
+\label{sub2:action-space}
+
+The boat can take one of eight discrete actions, which are predicted by DQN algorithm.
+
+\vspace{.5cm}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{||l c c ||}
+    \hline
+     Action & Left Propeller Speed & Right Propeller Speed \\
+     \hline\hline
+     0 (Forward) & 1 & 1 \\
+     1 (Backward) & -1 & -1 \\
+     2 (Left) & 1 & -1 \\
+     3 (Right) & -1 & 1 \\
+     4 (0.5 Right) & -0.5 & 0.5 \\
+     5 (0.5 Left) & 0.5 & -0.5 \\
+     6 (0.3 Right) & -0.3 & 0.3 \\
+     7 (0.3 Left) & 0.3 & -0.3 \\
+    \hline
+\end{tabular}
+\caption{Discrete actions predicted by the DQN algorithm}
+\label{tab:action-space}
+\end{table}
+
+\subsubsection*{Observation Space}
+\label{sub2:observation-space}
+
+\subsubsection*{Reward}
+\label{sub2:reward}
+
+\subsection{Pytorch}
+\label{sub:pytorch}
+
+\section{Image Preprocessing}
+\label{sec:image-preprocessing}
+
+\section{Deep Reinforcement Network Architectures}
+\label{sec:dnn-architectures}
+
+\subsection{Deep Q-Network}
+\label{sub:deep-q-network}
+
+\subsection{Double Deep Q-Network}
+\label{sub:double-deep-q-network}
+
+\subsection{Dueling Deep Q-Network}
+\label{sub:dueling-deep-q-network}
+
+\subsection{Dueling Double Deep Q-Network}
+\label{sub:dueling-double-deep-q-network}
