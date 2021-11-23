@@ -86,15 +86,17 @@ Despite the boat being placed in a relatively spacious map, its \textbf{state sp
 
 \begin{equation}
     x^i - \psi \leq x_{agent} \leq x^i + \psi
+\label{eq:5.1}
 \end{equation}
 
 the constraints must be followed,
 
 \begin{equation}
     y^i_l + \psi \leq y_{agent} \leq y^i_r + \psi
+\label{eq:5.2}
 \end{equation}
 
-where $\psi$ is an offset. Otherwise the boat is considered off-track, which is an illegal space, and \emph{done} flag is set \emph{true} . Additionally, maximum distance from desired point has been introduced, which cannot be greater than the largest distance of a state space. The distance is calculated as simple \emph{euclidean distance}
+where $\psi$ is an offset. Otherwise the boat is considered off-track, which is an illegal space, and \emph{done} flag is set \emph{true}. After the boat passed pair of corresponding buoys, also called a \emph{checkpoint}, it cannot move backwards any further than $x^i - 3$ or the episode is terminated (done). This constraint gives an direction for the agent to follow. Additionally, maximum distance from desired point has been introduced, which cannot be greater than the largest distance of a state space. The distance is calculated as simple \emph{euclidean distance}
 
 \begin{equation}
     d = \sqrt{(x_1 - x_2)^2 + (y_1-y_2)^2}
@@ -132,14 +134,59 @@ The boat can take one of eight discrete actions, which are predicted by DQN algo
 \subsubsection*{Observation Space}
 \label{sub2:observation-space}
 
+Usually the observation space $O$ is just a part of the entire state space $S$. However in this particular use case the information about the relative $(x, y, z)$ location was replaced by images from cameras. The agent does not have an access to odometry information. The only way to perceive the environment is through its vision system.
+
+The Raw 1280x720 are preprocessed before feeding the neural network. This step is crucial in achieving close to optimal performance, because only particular features on image are useful. In our particular case buoys are what matters. Neither the beautiful blue sky nor eye-catching azure water bring any viable information for keeping the boat inside the track. Therefore the following steps are performed:
+
+\begin{enumerate}
+    \item \textbf{Cropping}
+    
+    The bottom 240 pixels are removed, since they contain only redundant water and front of the boat. To get wider picture refer to fig. \ref{fig:camera-view}.
+    
+    \item \textbf{Concatenation}
+    
+    Left half of the left's camera image is concatenated with right half of the right's camera image along vertical axis. Resulting image has the same resolution as original one.
+    
+    \item \textbf{Color segmentation}
+    
+    To make it easier for the neural network to recognize important parts of an image the key colors are segmented based on their values. In order to perform that, the mask is applied which set all the pixels which are not red to 0. Pixel color is understood as the output of all RGB channels. Same operation is applied for green, because these are colors of buoys. Finally both masked out images are added resulting in the following image.
+    
+    \begin{figure}[h]
+        \centering
+        \includegraphics{}
+        \caption{Image after color segmentation}
+        \label{fig:color-segmented-image}
+    \end{figure}
+    
+    \item{Resizing}
+    
+    Images are downscaled from the original 1280x720 resolution to 80x60. It significantly accelerates the training process while keeping all the valuable information.
+    
+    \item \textbf{Normalization}
+
+    Pixel values are normalized to $[0, 1]$ again for boosting neural network performance, CNN in particular.
+    
+    \item \textbf{Image stacking}
+    
+    The last 5 camera images are concatenated into a tensor with dimensions $(60, 80, 3 \times 5)$. The numbers represent height, width, number of channels and sequence length respectively. This approach creates a time series containing enriched information that results in better policy networks compared to a single image. Same method was used in preprocessing stage by \emph{Google Deep Mind} in a state-of-the-art DQN exceeding human-level performance in Atari2600 games \cite{DQNAtari}.
+\end{enumerate}
+
+Consequently, after all preprocessing steps have been performed, the observation space is a $3^{rd}$ order $(60 \times 80 \times 15)$ tensor. Values are within $[0, 1]$ range.
+
 \subsubsection*{Reward}
 \label{sub2:reward}
 
-\subsection{Pytorch}
-\label{sub:pytorch}
+There have been various reward systems tested. At first the agent had been rewarded with small value $R_a(s, s')$ for every step that got it closer to the desired point $(x_d, y_d)$ and punished with $-R_a(s, s')$ otherwise. If it managed to reach $(x_d, y_d)$ it was additionally rewarded with much greater \emph{done reward} $40R_a(s, s')$ and punished with $-40R_a(s, s')$. Although the second reward is undoubtedly necessary to allow the reinforcement network distinguish between successful and unsuccessful episode, the small partial reward was confusing. There were parts of the track which forced the boat to float against the "current". That is in order not to leave the track the agent had to acquire negative rewards throughout several episodes, which was breaking the learning process at some point eventually.
 
-\section{Image Preprocessing}
-\label{sec:image-preprocessing}
+The new approach replaced partial step reward with checkpoint reward. Pairs of corresponding buoys are stored in a LIFO\footnote{Last in first out} list. The agent crosses the checkpoint when both \ref{eq:5.1} \& \ref{eq:5.2} are satisfied and is moving towards desired position. When it occurs, the pair of buoys is popped out from list to prevent the boat from gaining multiple rewards for crossing the same checkpoint. Altogether, the maximum reward equals 
+
+\begin{equation}
+R_{max} = N \cdot R_a(s, s') + 40R_a(s, s')
+\end{equation}
+
+where $N$ is number of checkpoints.
+
+Such strategy for reward distribution turned out to be effective despite its simplicity.
 
 \section{Deep Reinforcement Network Architectures}
 \label{sec:dnn-architectures}
