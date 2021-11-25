@@ -11,8 +11,8 @@ Before any algorithm begin to train an autonomous agent a virtual reality must b
 \subsection{Gazebo}
 \label{sub:gazebo}
 
-The simulation environment chosen for the project was \emph{Gazebo 11}\footnote{https://gazebosim.org/} - an open source robot 3D simulator.
-It is used for designing robots, offering ROS integration, performing regression testing with realistic scenarios and, what is most important, testing robotics algorithms. Needless to say, it perfectly satisfies project's prerequisites. Since the main purpose of the Thesis was the vision system, not the simulation environment itself, there has been chosen a \textbf{Virtual RobotX} \cite{bingham19toward} project as a starting point. It is an simulation environment, designed in coordination with RobotX\footnote{https://defenceinnovationnetwork.com/robotx-challenge-2022/} challenge organizers - the international, university-level maritime autonomous robotic systems competition. However, it required several modifications.
+The simulation environment chosen for the project was \emph{Gazebo 11}\footnote{\url{https://gazebosim.org/}} - an open source robot 3D simulator.
+It is used for designing robots, offering ROS integration, performing regression testing with realistic scenarios and, what is most important, testing robotics algorithms. Needless to say, it perfectly satisfies project's prerequisites. Since the main purpose of the Thesis was the vision system, not the simulation environment itself, there has been chosen a \textbf{Virtual RobotX} \cite{bingham19toward} project as a starting point. It is an simulation environment, designed in coordination with RobotX\footnote{\url{https://defenceinnovationnetwork.com/robotx-challenge-2022/}} challenge organizers - the international, university-level maritime autonomous robotic systems competition. However, it required several modifications.
 
 First of all, the environment must have followed simplicity principle, hence the \emph{Sydney regatta} map was used. All obstacles were replaced with buoys which created a route for the boat, as in the following image. 
 
@@ -47,9 +47,9 @@ The boat running on the ROS is equipped with multiple sensors, but for the purpo
 \subsection{OpenAI Gym}
 \label{sub:openai-gym}
 
-OpenAI Gym\footnote{https://gym.openai.com/} is a toolkit for developing and comparing reinforcement learning algorithms. It supports multiple environments, from walking agent to playing games like \emph{Pong} or \emph{Pinball}. Running simulation with gym is straightforward. At every step an agent chooses an action, then takes a step in the environment. In return we receive observation for the state $s'$, reward $R_a(s, s')$ and \emph{done} flag, which is a boolean value.
+OpenAI Gym\footnote{\url{https://gym.openai.com/}} is a toolkit for developing and comparing reinforcement learning algorithms. It supports multiple environments, from walking agent to playing games like \emph{Pong} or \emph{Pinball}. Running simulation with gym is straightforward. At every step an agent chooses an action, then takes a step in the environment. In return we receive observation for the state $s'$, reward $R_a(s, s')$ and \emph{done} flag, which is a boolean value.
 
-\begin{lstlisting}[language=Python, caption={Example gym environment simulation}, captionpos=b]
+\begin{lstlisting}[language=Python, caption={Example gym environment simulation}]
     env = gym.make('My-env')
     observaton = env.reset()
     for _ in range(steps):
@@ -226,6 +226,7 @@ Experience replay $e_t = (s_t, a_t, R_{at}(s, s'), s_{t+1})$ is stored at each t
 
 \begin{equation}
     L_i(\theta_i) = \sum_{(s, s') \sim U(D)}P_a(s, s')\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)^2
+\label{eq:deep-q-loss}
 \end{equation}
 
 Which is actually a squared, parameterized temporal difference (\ref{sub:temporal-difference-learning}).
@@ -249,8 +250,94 @@ The algorithm steps are nearly identical to the Q-learning (\ref{sec:q-learn}) w
 
 This Deep Q-learning algorithm is also an model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$ ensuring adequate exploration-exploitation balance while learning about the greedy policy $\pi^*(s) = arg\max_{a'}Q(s, a'; \theta)$.
 
+\subsubsection*{Training algorithm for Deep Q-Networks}
+\label{sub2:training-algo-for-deep-q-net}
+
+The full algorithm is presented in listing below. It uses already explained concepts as experience replay or two networks - evaluation $Q$ and target $\hat{Q}$ to make it possible to train a large ANN without diverging. In a standard Q-learning approach every update that increases $Q(s, a)$ also increases $Q(s', a)$ for all $a$ subsequently resulting in an increase of the target $y$. This may lead to undesired oscillations or divergence of the policy. Using two networks addresses this issue. Additionally, clipping the error from loss function \ref{eq:deep-q-loss} $\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)$ to $[-1, 1]$ also increased the stability of the algorithm.
+
+The entire algorithm was written in \emph{Python} 3.9.7 using \emph{pytorch} 1.9.1 library. An image preprocessing part was held in \emp{opencv-python} 4.5.3.56. Source code with all dependencies can be found at \emph{github repository}\footnote{\url{https://github.com/A-NGJ/bachelor_thesis}}.
+
+\begin{lstlisting}[language=Python, caption={Main algorithm loop}]
+1  agent = Agent(**hyperparameters)
+2  agent.initialize_memory(mem_size)
+3  # initialize evaluation network with random weights
+4  agent.initialize_q_eval()
+5  # initialize target network with identical weights to q_eval
+6  agent.initialize_q_target()
+7  for i in range(epochs):
+8      done = False
+9      observation = env.reset() # start with fresh environment
+10     game_steps = 0 # steps per epoch accumulator
+11     steps = 0 # overall steps accumulator
+12        
+13     while not done:
+14         if random(min=0, max=1) > epsilon:
+15             # feed forward observation through DQN to get q-values for each action
+16             # choose the action which maximises Q
+17             action = argmax(q_eval.forward(observation))
+18         else:
+19             # chose random action from action space
+20             action = random_choice(action_space)
+21            
+22         # execute action in a simulator
+23         next_observation, reward, done = env.step(action)
+24         # store transition in a memory
+25         agent.store_transition(observation, action, reward,
+26                                next_observation, done)
+27         # start learning only after it was filled with samples
+28         if memory.is_filled:
+29             if steps % replace_frequency:
+30                 q_target.load_parameters_from(q_eval)
+31         # Sample minibatch of size batch_size from the memory
+32         observations, actions, rewards, next_observations, dones =\\
+33             sample_memory(size=batch_size)
+34         # Get q-values for actions predicted by both evalueation and target network
+35         q_pred = q_eval.forward(observations)
+36         q_next = q_target.forward(next_observations)
+37         # if episode terminates after an action, target value is equal only to reward
+38         q_next[dones] = 0.0
+39         # Plural names are used because operations are performed 
+40         # on the entire minibatch
+41         q_target = rewards * gamma*q_next
+42         # Perform a gradient descent, MSE loss is used
+43         loss = q_eval.loss(q_target, q_pred)
+44         # Clip error between -1 and 1
+45         loss.clip(-1, 1)
+46         q_eval.backpropagate(loss)
+47         decrement_epsilon(eps_dec)
+48              
+49         observation = next_observation
+50         game_steps += 1
+51         steps += 1
+52         # Terminate an episode if maximum number of steps has been reached
+53         if game_steps > max_steps:
+54             break
+\end{lstlisting}
+
 \subsection{Double Deep Q-Network}
 \label{sub:double-deep-q-network}
+
+Although Deep Q-Network is capable of finding good approximation of optimal policy, it is not flawless. As \emph{Hado van Hasselt}, \emph{Arthur Guez} and \emph{David Silver} \cite{DBLP:journals/corr/HasseltGS15} show that DQN sometimes substantially overestimates the values of the actions. In a DQN evaluation
+
+\begin{equation}
+    y_i = R_a(s, s') + \gamma \max_{a'}Q(s', a'; \theta^-_i)
+\end{equation}
+
+the \emp{max} operator uses equal values both to select and to evaluate an action. This leads to overoptimistic estimations of values. In order to address that issue action selection can be separated from action evaluation. This is the main concept behind \emph{Double Deep Q-learning}. Slight change which leads to significant improvement in preventing the value overestimation. Luckily, DQN architecture provides natural candidate for a action-value function which would replace the \emph{max} operator. The evaluation network is used, as the name suggests, to evaluate the greedy policy whereas a target network estimates its value. As a result we get
+
+\begin{equation}
+    y_i = R_a(s, s') + \gamma \hat{Q}(s', arg\max_{a'}Q(s', a'; \theta_i); \theta^-_i)
+\end{equation}
+
+That is it! A performance boost with perhaps minimal possible change to DQN. The rest of algorithm stays intact, so the only change we need to introduce is in lines 35 - 41:
+
+\begin{lstlisting}[language=Python, caption={Double Deep Q-learning modification}]
+35  q_pred = q_eval.forward(observations)
+36  q_next = q_target.forward(next_observations)
+37  q_eval = q_eval.forward(next_obsevations)
+38  q_next[dones] = 0.0
+39  q_target = rewards + gamma*q_next[argmax(q_eval)]
+\end{lstlisting}
 
 \subsection{Dueling Deep Q-Network}
 \label{sub:dueling-deep-q-network}
@@ -261,3 +348,6 @@ This Deep Q-learning algorithm is also an model-free and off-policy algorithm, j
 \subsection{Training details}
 \label{sub:training-details}
 
+The training was performed in a fixed simulation environment described in \ref{sec:simulation-env}. Hyperparameters were set to values from table \ref{tab:hyperparameters}. They were identical for every network architecture. Each network architecture described above has been trained from scratch for 700 epochs keeping track of score and average Q-value along single episode. These indicators were further crucial in model evaluation and comparison. Due to hardware limitations it was impossible to train a model for a longer period even though it was clear that longer training would have resulted in a better outcome. The entire training lasted 8-12h and was susceptible to unexpected system errors, because the simulation environment was unstable when it was running for the extended time. Therefore tuning hyperparameters took considerable amount of time and for some fixtures the evaluation had to be rerun. It is unclear whether the hyperparameters proposed in the section are optimal, yet these are the ones for which the agent managed to acquire highest score. A grid search was not performed owing to too high computational cost and time limitations. The final parameters base on a empirical results and architectures proposed in (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, ...).
+
+In the experiments there was used RMSProp optimization algorithm and in the entire training there were used on average 100000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
