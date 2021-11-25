@@ -18,7 +18,7 @@ First of all, the environment must have followed simplicity principle, hence the
 
 \begin{figure}[h]
     \centering
-    \includegraphics{}
+    \includegraphics[width=16cm]{img/simulation_view.png}
     \caption{Sydney regatta map with prepared track}
     \label{fig:sydney-regatta-map}
 \end{figure}
@@ -39,7 +39,7 @@ The boat running on the ROS is equipped with multiple sensors, but for the purpo
 
 \begin{figure}[h]
     \centering
-    \includegraphics{}
+    \includegraphics[width=16cm]{img/front_camera_image.png}
     \caption{View from boat's camera}
     \label{fig:camera-view}
 \end{figure}
@@ -153,7 +153,7 @@ The Raw 1280x720 are preprocessed before feeding the neural network. This step i
     
     \begin{figure}[h]
         \centering
-        \includegraphics{}
+        \includegraphics[width=16cm]{img/image_color_segmentation.png}
         \caption{Image after color segmentation}
         \label{fig:color-segmented-image}
     \end{figure}
@@ -168,10 +168,10 @@ The Raw 1280x720 are preprocessed before feeding the neural network. This step i
     
     \item \textbf{Image stacking}
     
-    The last 5 camera images are concatenated into a tensor with dimensions $(60, 80, 3 \times 5)$. The numbers represent height, width, number of channels and sequence length respectively. This approach creates a time series containing enriched information that results in better policy networks compared to a single image. Same method was used in preprocessing stage by \emph{Google Deep Mind} in a state-of-the-art DQN exceeding human-level performance in Atari2600 games \cite{DQNAtari}.
+    The last 5 camera images are concatenated into a tensor with dimensions $(64, 80, 3 \times 5)$. The numbers represent height, width, number of channels and sequence length respectively. This approach creates a time series containing enriched information that results in better policy networks compared to a single image. Same method was used in preprocessing stage by \emph{Google Deep Mind} in a state-of-the-art DQN exceeding human-level performance in Atari2600 games \cite{DQNAtari}.
 \end{enumerate}
 
-Consequently, after all preprocessing steps have been performed, the observation space is a $3^{rd}$ order $(60 \times 80 \times 15)$ tensor. Values are within $[0, 1]$ range.
+Consequently, after all preprocessing steps have been performed, the observation space is a $3^{rd}$ order $(64 \times 80 \times 15)$ tensor. Values are within $[0, 1]$ range.
 
 \subsubsection*{Reward}
 \label{sub2:reward}
@@ -191,8 +191,63 @@ Such strategy for reward distribution turned out to be effective despite its sim
 \section{Deep Reinforcement Network Architectures}
 \label{sec:dnn-architectures}
 
+There has been four deep neural network architecture evaluated, all of which base on a DQN described more in depth in section \ref{sec:deep-q-learn}. Each consecutive one was expected to present better performance, because every architecture except the core Deep Q-Network is only an extension which addresses some of know issues of the predecessor. The goal was to compare each network's performance in the same simulation scenario, for an exact set of hyperparameters derived from empirical trials. No grid search was performed owing to high computational cost. The results of such comparison are presented in the following chapter.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c c|}
+        \hline
+        \multicolumn{2}{|c|}{Hyperparameters} \\
+        \hline
+        learning rate (lr) & $1e^{-5}$ \\
+        $\gamma$ & $0.99$ \\
+        $\epsilon$ & $1.0$ \\
+        $\epsilon$ decrease & $5e^{-5}$ \\
+        $\epsilon_{min}$ & $0.01$ \\
+        memory size & $4e^4$ \\
+        batch size & $32$ \\
+        replace target network steps & $1000$ \\
+        max steps & $1000$ \\
+        \hline
+    \end{tabular}
+    \caption{Hyperparameters used in every architecture}
+    \label{tab:hyperparameters}
+\end{table}
+
 \subsection{Deep Q-Network}
 \label{sub:deep-q-network}
+
+This is the underlying architecture behind every network in the research. It was highly inspired by \emph{Google Deep Mind} research from 2015 \cite{DQNAtari}, which has been already mentioned in the Thesis. Although this DQN has presented outstanding performance in the Atari2600 environment it had been questionable whether same results would be observed in the Gazebo environment. There are considerably more distinct states which differ only slightly from one another. Unlike the Atari game where screens change more dynamically and contain more characteristic features.
+
+Most of the key concepts behind the implementation of Deep Q-Network, such as \emph{temporal difference}, \emph{q-value}, \emph{experience replay}, \emph{markov decision process} or \emph{bellman equation}, have been already discussed in sections \ref{sec:q-learn} and \ref{sec:deep-q-learn}.
+The issue with direct implementation of those is that reinforcement learning is known to be unstable or even to diverge when a nonlinear function approximator such as a neural network is used to represent the action-value (Q) function. These instabilities are addressed by experience replay (\ref{sub:experience-replay}) and splitting evaluation and prediction into \emph{Evaluation Q-Network} (Q-eval) and \emph{Target Q-Network} (Q-Target). Whereas the first one is used to update weights using stochastic gradient descent and a loss function, the latter is used to make predictions about the next action. The action-value function $Q(s, a; \theta_i)$ is parameterized, where $\theta_i$ are the weights of the Q-network at iteration $i$. Target network is an exact copy of the evaluation network having parameters $\theta^-_i$ replaced (copied $\theta_i$ from the evaluation network) every $C$ steps and held fixed between individual updates. This approach significantly stabilises learning process.
+
+Experience replay $e_t = (s_t, a_t, R_{at}(s, s'), s_{t+1})$ is stored at each time step $t$ in a buffer $D_t = \{e_{\max\left(1, (t - mem\_size)\right)}, ..., e_t\}$. During learning there are updates applied on uniformly drawn samples of experience $U(D)$ of size $batch\_size$. The update means backpropagating stochastic gradient descent at iteration $i$ using the following loss
+
+\begin{equation}
+    L_i(\theta_i) = \sum_{(s, s') \sim U(D)}P_a(s, s')\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)^2
+\end{equation}
+
+Which is actually a squared, parameterized temporal difference (\ref{sub:temporal-difference-learning}).
+
+\subsubsection*{Model Architecture}
+\label{sub2:model architecture}
+
+The architecture used takes as an input state observation (\ref{sub:openai-gym}/Observation space) and returns predicted Q-values for all possible actions. The greatest advantage of such solution is that only one forward pass is needed to compute Q-value for every action. The input to the neural network consist of 5 stacked $64 \times 80$ images. There are three convolutional layers in the network, each proceeded by ReLU (\ref{sec:activation-function}) and max pool (\ref{sec:conv-pooling}) operations. The convolutional layers use 32, 64, 64 filters of $3 \times 3$ size. The max pool layers use $2 \times 2$ filter reducing the size of input $8$ times to $8 \times 10$. The hidden fully connected layer consist of 256 linear rectifier units. The output layer is a fully-connected linear layer with number of outputs representing number of actions, in our case $8$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=18cm]{img/model-architecture.png}
+    \caption{DQN network used in the vision system}
+    \label{fig:dqn-network}
+\end{figure}
+
+\subsubsection*{Algorithm}
+\label{sub2:dqn-algorithm}
+
+The algorithm steps are nearly identical to the Q-learning (\ref{sec:q-learn}) with the exception that nonlinear approximator is used instead of a linear one. Therefore optimal action-value function is estimated as $Q(s, a; \theta) \approx Q^*(s, a)$. The neural network approximator with weights $\theta$ is referred as Deep Q-network. It is trained by adjusting weights $\theta_i$ at step $i$ to reduce loss function where target values $y = R_a(s, s') + \gamma \max_{a'}Q^*(s', a')$ are replaced by approximate target values $y = R_a(s, s') + \gamma \max_{a'}Q(s', a';\theta^-_i)$ using weights $\theta^-_i$ from some previous step.
+
+This Deep Q-learning algorithm is also an model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$ ensuring adequate exploration-exploitation balance while learning about the greedy policy $\pi^*(s) = arg\max_{a'}Q(s, a'; \theta)$.
 
 \subsection{Double Deep Q-Network}
 \label{sub:double-deep-q-network}
@@ -202,3 +257,7 @@ Such strategy for reward distribution turned out to be effective despite its sim
 
 \subsection{Dueling Double Deep Q-Network}
 \label{sub:dueling-double-deep-q-network}
+
+\subsection{Training details}
+\label{sub:training-details}
+
