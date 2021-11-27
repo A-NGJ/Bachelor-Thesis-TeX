@@ -342,12 +342,68 @@ That is it! A performance boost with perhaps minimal possible change to DQN. The
 \subsection{Dueling Deep Q-Network}
 \label{sub:dueling-deep-q-network}
 
+Dueling network architecture was first proposed by \emph{Ziyu Wang  et al.} \cite{DBLP:journals/corr/WangFL15}. It was a direct approach to 
+improve model-free RL models. The underlying idea is to separate the representation of state values $V(s)$ and state dependent action 
+advantages $A(s, a)$. Unlike DQN or DDQN it consist of two streams that represent the value and adavantage functions, as shown below.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10cm]{img/dueling_vs_single_qn.png}
+    \caption{Single stream Deep Q-Network (top) and Dueling Deep Q-Network (bottom). Source \cite{DBLP:journals/corr/WangFL15}}
+    \label{fig:single-vs-dueling-q-network}
+\end{figure}
+
+The advantage function is defined as
+
+\begin{equation}
+    A(s, a) = Q(s, a) - V(s)
+\label{eq:advantage}
+\end{equation}
+
+It measures how good is actually every action $a$ while being in state $s$. If we think of $Q(s, a)$ as a quality of each action that can be
+taken in a particular state and $V(s)$ as a actual value of given state, the difference is a pure action importance. If the action does not 
+change the state substantially it means that action is rather negligible. On the other hand, if the difference is high, the action must be
+influential. Intuitively it makes absolute sense. Taking as an example our simulation, in most of states it does not matter whether the agents floats slightly left or right, as long as it is not at the track edge. Note that for the greedy policy $a^* = \pi^*(s) = arg\max_aQ(s, a)$, it follows that $Q^*(s, a) = V^*(s, a^*)$ therefore $A(s, a^*) = 0$.
+
+The Dueling DQN architecture is identical to DQN until the point of fully connected layer, where instead of single sequence of fully
+connected layers, there are used two. The separate streams are capable of providing estimates of the value and advantage functions.
+Subsequently these streams are combined to output a set of Q-values, one for each action $a \in A$\footnote{In this section bare $A$
+represents action space, as it did through the entire Thesis, whereas $A(s, a)$ represents advantage function.}
+The state value approximation network can be expressed as $V(s; \theta, \beta)$ and advantage approximation network as $A(s, a; \theta,
+\alpha)$. Where $\theta$ are the parameters of convolutional layers, $\beta$ denotes the weights of fully connected value network and
+$\alpha$ analogously for the advantage network.
+
+Constructing the aggregate module which is the approximation for Q function is not that straightforward though. Using directly the advantage definition (\ref{eq:advantage})
+
+\begin{equation}
+    Q(s, a; \theta, \alpha, \beta) = V(s; \theta, \beta) + A(s, a; \theta, \alpha)
+\end{equation}
+
+leads to the identifiability problem. That is, it is impossible to recover $V(s)$ and $A(s, a)$ from the given $Q$. In order to address
+that, we can force the advantage function estimator to have zero advantage at the chosen action.
+
+\begin{equation}
+    Q(s, a; \theta, \alpha, \beta) = V(s; \theta, \beta) + \left(A(s, a; \theta, \alpha) - \frac{1}{|A|} \sum_a A(s, a; \theta, \alpha)\right)
+\end{equation}
+
+Now every time the advantages change as fast as the mean the above equation has the form of $Q(s, a; \theta, \alpha, \beta) = V(s; \theta,
+\beta)$. Therefore it is clear which stream provides estimate of the value function and which the estimate of the advantage function.
+
+In order to implement Dueling DQN architecture, we again modify lines 35-36. This change literally replaces single fully connected layer stream with dual, remaining parts stay intact.
+
+\begin{lstlisting}[language=Python, caption={Dueling Deep Q-learning modification}]
+35  V_s, A_s = q_eval.forward(observations)
+36  V_s_next, A_s_next = q_target.forward(next_observations)
+37  q_pred = V_s + (A_s - mean(A_s))
+38  q_next = V_s_next + (A_s_next - mean(A_s_next))
+\end{lstlisting}
+
 \subsection{Dueling Double Deep Q-Network}
 \label{sub:dueling-double-deep-q-network}
 
 \subsection{Training details}
 \label{sub:training-details}
 
-The training was performed in a fixed simulation environment described in \ref{sec:simulation-env}. Hyperparameters were set to values from table \ref{tab:hyperparameters}. They were identical for every network architecture. Each network architecture described above has been trained from scratch for 700 epochs keeping track of score and average Q-value along single episode. These indicators were further crucial in model evaluation and comparison. Due to hardware limitations it was impossible to train a model for a longer period even though it was clear that longer training would have resulted in a better outcome. The entire training lasted 8-12h and was susceptible to unexpected system errors, because the simulation environment was unstable when it was running for the extended time. Therefore tuning hyperparameters took considerable amount of time and for some fixtures the evaluation had to be rerun. It is unclear whether the hyperparameters proposed in the section are optimal, yet these are the ones for which the agent managed to acquire highest score. A grid search was not performed owing to too high computational cost and time limitations. The final parameters base on a empirical results and architectures proposed in (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, ...).
+The training was performed in a fixed simulation environment described in \ref{sec:simulation-env}. Hyperparameters were set to values from table \ref{tab:hyperparameters}. They were identical for every network architecture. Each network architecture described above has been trained from scratch for 700 epochs keeping track of score and average Q-value along single episode. These indicators were further crucial in model evaluation and comparison. Due to hardware limitations it was impossible to train a model for a longer period even though it was clear that longer training would have resulted in a better outcome. The entire training lasted 8-12h and was susceptible to unexpected system errors, because the simulation environment was unstable when it was running for the extended time. Therefore tuning hyperparameters took considerable amount of time and for some fixtures the evaluation had to be rerun. It is unclear whether the hyperparameters proposed in the section are optimal, yet these are the ones for which the agent managed to acquire highest score. A grid search was not performed owing to too high computational cost and time limitations. The final parameters base on a empirical results and architectures proposed in (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, \cite{DBLP:journals/corr/WangFL15}).
 
 In the experiments there was used RMSProp optimization algorithm and in the entire training there were used on average 100000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
