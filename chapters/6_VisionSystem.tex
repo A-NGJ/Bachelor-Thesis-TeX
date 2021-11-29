@@ -234,11 +234,17 @@ Which is actually a squared, parameterized temporal difference (\ref{sub:tempora
 \subsubsection*{Model Architecture}
 \label{sub2:model architecture}
 
-The architecture used takes as an input state observation (\ref{sub:openai-gym}/Observation space) and returns predicted Q-values for all possible actions. The greatest advantage of such solution is that only one forward pass is needed to compute Q-value for every action. The input to the neural network consist of 5 stacked $64 \times 80$ images. There are three convolutional layers in the network, each proceeded by ReLU (\ref{sec:activation-function}) and max pool (\ref{sec:conv-pooling}) operations. The convolutional layers use 32, 64, 64 filters of $3 \times 3$ size. The max pool layers use $2 \times 2$ filter reducing the size of input $8$ times to $8 \times 10$. The hidden fully connected layer consist of 256 linear rectifier units. The output layer is a fully-connected linear layer with number of outputs representing number of actions, in our case $8$.
+The architecture used takes as an input state observation (\ref{sub:openai-gym}/Observation space) and returns predicted Q-values for all possible
+actions. The greatest advantage of such solution is that only one forward pass is needed to compute Q-value for every action. The input to the
+neural network consist of 5 stacked $64 \times 80$ images. There are three convolutional layers in the network, each proceeded by ReLU
+(\ref{sec:activation-function}) and max pool (\ref{sec:conv-pooling}) operations. The convolutional layers use 32, 64, 64 filters of $3 \times 3$
+size. The max pool layers use $2 \times 2$ filter reducing the size of input $8$ times to $8 \times 10$. The hidden fully connected layer consist
+of 256 linear rectifier units. The output layer is a fully-connected linear layer with number of outputs representing number of actions, in our
+case $8$.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=18cm]{img/model-architecture.png}
+    \includegraphics[width=16cm]{img/model-architecture.png}
     \caption{DQN network used in the vision system}
     \label{fig:dqn-network}
 \end{figure}
@@ -246,16 +252,27 @@ The architecture used takes as an input state observation (\ref{sub:openai-gym}/
 \subsubsection*{Algorithm}
 \label{sub2:dqn-algorithm}
 
-The algorithm steps are nearly identical to the Q-learning (\ref{sec:q-learn}) with the exception that nonlinear approximator is used instead of a linear one. Therefore optimal action-value function is estimated as $Q(s, a; \theta) \approx Q^*(s, a)$. The neural network approximator with weights $\theta$ is referred as Deep Q-network. It is trained by adjusting weights $\theta_i$ at step $i$ to reduce loss function where target values $y = R_a(s, s') + \gamma \max_{a'}Q^*(s', a')$ are replaced by approximate target values $y = R_a(s, s') + \gamma \max_{a'}Q(s', a';\theta^-_i)$ using weights $\theta^-_i$ from some previous step.
+The algorithm steps are nearly identical to the Q-learning (\ref{sec:q-learn}) with the exception that nonlinear approximator is used instead of a
+linear one. Therefore optimal action-value function is estimated as $Q(s, a; \theta) \approx Q^*(s, a)$. The neural network approximator with
+weights $\theta$ is referred as Deep Q-network. It is trained by adjusting weights $\theta_i$ at step $i$ to reduce loss function where target
+values $y = R_a(s, s') + \gamma \max_{a'}Q^*(s', a')$ are replaced by approximate target values $y = R_a(s, s') + \gamma \max_{a'}Q(s',
+a';\theta^-_i)$ using weights $\theta^-_i$ from some previous step.
 
-This Deep Q-learning algorithm is also an model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$ ensuring adequate exploration-exploitation balance while learning about the greedy policy $\pi^*(s) = arg\max_{a'}Q(s, a'; \theta)$.
+This Deep Q-learning algorithm is also an model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$
+ensuring adequate exploration-exploitation balance while learning about the greedy policy $\pi^*(s) = arg\max_{a'}Q(s, a'; \theta)$.
 
 \subsubsection*{Training algorithm for Deep Q-Networks}
 \label{sub2:training-algo-for-deep-q-net}
 
-The full algorithm is presented in listing below. It uses already explained concepts as experience replay or two networks - evaluation $Q$ and target $\hat{Q}$ to make it possible to train a large ANN without diverging. In a standard Q-learning approach every update that increases $Q(s, a)$ also increases $Q(s', a)$ for all $a$ subsequently resulting in an increase of the target $y$. This may lead to undesired oscillations or divergence of the policy. Using two networks addresses this issue. Additionally, clipping the error from loss function \ref{eq:deep-q-loss} $\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)$ to $[-1, 1]$ also increased the stability of the algorithm.
+The full algorithm is presented in listing below. It uses already explained concepts as experience replay or two networks - evaluation $Q$ and
+target $\hat{Q}$ to make it possible to train a large ANN without diverging. In a standard Q-learning approach every update that increases $Q(s,
+a)$ also increases $Q(s', a)$ for all $a$ subsequently resulting in an increase of the target $y$. This may lead to undesired oscillations or
+divergence of the policy. Using two networks addresses this issue. Additionally, clipping the error from loss function \ref{eq:deep-q-loss}
+$\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)$ to $[-1, 1]$ also increased the stability of the algorithm.
 
-The entire algorithm was written in \emph{Python} 3.9.7 using \emph{pytorch} 1.9.1 library. An image preprocessing part was held in \emp{opencv-python} 4.5.3.56. Source code with all dependencies can be found at \emph{github repository}\footnote{\url{https://github.com/A-NGJ/bachelor_thesis}}.
+The entire algorithm was written in \emph{Python} 3.9.7 using \emph{pytorch} 1.9.1 library. An image preprocessing part was held in
+\emp{opencv-python} 4.5.3.56. Source code with all dependencies can be found at \emph{github
+repository}\footnote{\url{https://github.com/A-NGJ/bachelor_thesis}}.
 
 \begin{lstlisting}[language=Python, caption={Main algorithm loop}]
 1  agent = Agent(**hyperparameters)
@@ -323,7 +340,7 @@ Although Deep Q-Network is capable of finding good approximation of optimal poli
     y_i = R_a(s, s') + \gamma \max_{a'}Q(s', a'; \theta^-_i)
 \end{equation}
 
-the \emp{max} operator uses equal values both to select and to evaluate an action. This leads to overoptimistic estimations of values. In order to address that issue action selection can be separated from action evaluation. This is the main concept behind \emph{Double Deep Q-learning}. Slight change which leads to significant improvement in preventing the value overestimation. Luckily, DQN architecture provides natural candidate for a action-value function which would replace the \emph{max} operator. The evaluation network is used, as the name suggests, to evaluate the greedy policy whereas a target network estimates its value. As a result we get
+the \emp{max} operator uses equal values both to select and to evaluate an action. This leads to overoptimistic estimations of values. In order to address that issue action selection can be separated from action evaluation. This is the main concept behind \emph{Double Deep Q-learning}. Slight change which leads to significant improvement in preventing the value overestimation. Luckily, DQN architecture provides natural candidate for a action-value function which would replace the \emph{max} operator. The evaluation network is used, as the name suggests, to evaluate the greedy policy whereas a target network estimates its value.
 
 \begin{equation}
     y_i = R_a(s, s') + \gamma \hat{Q}(s', arg\max_{a'}Q(s', a'; \theta_i); \theta^-_i)
@@ -382,7 +399,7 @@ Constructing the aggregate module which is the approximation for Q function is n
 \end{equation}
 
 leads to the identifiability problem. That is, it is impossible to recover $V(s)$ and $A(s, a)$ from the given $Q$. In order to address
-that, we can force the advantage function estimator to have zero advantage at the chosen action.
+that, the advantage function estimator can be forced to have zero advantage at the chosen action.
 
 \begin{equation}
     Q(s, a; \theta, \alpha, \beta) = V(s; \theta, \beta) + \left(A(s, a; \theta, \alpha) - \frac{1}{|A|} \sum_a A(s, a; \theta, \alpha)\right)
@@ -391,7 +408,7 @@ that, we can force the advantage function estimator to have zero advantage at th
 Now every time the advantages change as fast as the mean the above equation has the form of $Q(s, a; \theta, \alpha, \beta) = V(s; \theta,
 \beta)$. Therefore it is clear which stream provides estimate of the value function and which the estimate of the advantage function.
 
-In order to implement Dueling DQN architecture, we again modify lines 35-36. This change literally replaces single fully connected layer stream with dual, remaining parts stay intact.
+In order to implement Dueling DQN architecture, lines 35-36 again have to be modified. This change literally replaces single fully connected layer stream with dual, remaining parts stay intact.
 
 \begin{lstlisting}[language=Python, caption={Dueling Deep Q-learning modification}]
 35  V_s, A_s = q_eval.forward(observations)
@@ -451,4 +468,4 @@ in the section are optimal, yet these are the ones for which the agent managed t
 owing to too high computational cost and time limitations. The final parameters base on a empirical results and architectures proposed in
 (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, \cite{DBLP:journals/corr/WangFL15}).
 
-In the experiments there was used RMSProp optimization algorithm and in the entire training there were used on average 100000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
+In the experiments there was used RMSProp optimization algorithm and in the entire training there were used on average 80000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
