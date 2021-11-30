@@ -6,7 +6,7 @@ Deep learning methods has reached in the recent years state-of-the-art results i
 \section{Simulation Environment}
 \label{sec:simulation-env}
 
-Before any algorithm begin to train an autonomous agent a virtual reality must be created. Virtual for us of course, for the agent it is the only world that is known. The purpose was to find simple enough environment to minimise external factors which could affect the vision system performance and simultaneously complex enough to benchmark it. Additionally, simulation had to be compatible with \emph{Robot Operating System} (ROS) and \emph{OpenAI Gym} used to train proposed DQN. 
+Before any algorithm begin to train an autonomous agent a virtual reality must be created. Virtual for us of course, for the agent it is the only world that is known. The purpose was to find simple enough environment to minimise external factors which could affect the vision system performance and simultaneously complex enough to benchmark it. Additionally, simulation had to be compatible with \textbf{Robot Operating System} (ROS) and \textbf{OpenAI Gym} used to train proposed DQN. 
 
 \subsection{Gazebo}
 \label{sub:gazebo}
@@ -370,7 +370,7 @@ advantages $A(s, a)$. Unlike DQN or DDQN it consist of two streams that represen
     \label{fig:single-vs-dueling-q-network}
 \end{figure}
 
-The advantage function is defined as
+The \textbf{advantage function} is defined as
 
 \begin{equation}
     A(s, a) = Q(s, a) - V(s)

@@ -1,3 +1,25 @@
 \chapter{Conclusion}
 \label{cha:conclusion}
 
+Deep reinforcement learning is undoubtedly a powerful tool capable of handling complex tasks such as vision system for a boat control.
+Without any prior knowledge about the environment and with as little data as it is collected from front cameras the DQN managed to
+learn how to route an autonomous floating agent based only on trials and errors. A model-free architecture gives an incredible
+flexibility, just as it was in case of Atari2600 benchmarks. One architecture with slight modifications is capable of adjusting to wide
+range of training scenarios, whether it is an autonomous boat, car or agent playing Pong. The intelligence is defined as an ability to
+acquire, understand and use the knowledge. This is exactly what the created artificial neural network did in a limited environment.
+
+These limitations were the greatest obstacle in a research. The hardware played a significant role in a DQN training process. It takes a
+substantial amount of computational power to fine tune weights and biases which estimate the greedy policy the best. Therefore, without
+superb GPU it was impossible to perform a grid search to fine tune hyperparameters for every proposed architecture. What is more, the
+simulation environment itself was unstable and did not allow to train network for extended period, which might bring more detailed data
+about the performance of each deep reinforcement learning network.
+
+However, even with the limited analysis resources it is clear which DQN variation is the most appropriate for a vision system. The
+combined improvements introduced in Dueling DQN and Double DQN left behind the competition. It may seem that the simple track made of
+buoys would not present a challenge yet given the limited input data and number of seemingly indifferentiable states the network
+struggled to converge. What is more, the reward system played even more crucial role than hyperparameters and training time. It is
+the foundation of any reinforcement learning algorithm. There may be a better solution than proposed checkpoints yet among all of the
+tested rewarding systems this one presented the highest final score and the most stable, gradual increase of it throughout the training.
+
+All in all, the presented vision system architectures were capable of routing the autonomous floating agent through track limited
+by buoys. As experiments showed, an efficiency differed showing the superiority of Dueling Double Deep Q-Network. There is still a room for improvement, yet this research sheds a light on unquestionable potential of Deep Reinforcement Learning.

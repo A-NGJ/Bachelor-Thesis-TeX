@@ -21,7 +21,7 @@ point was 2450.
 
 The Deep Q-Network training was stable, however the network learned significantly slower that other architectures. Although Q-value on
 figure \ref{fig:avg-qval-dqn} was constantly increasing, it did not project on a score which oscillated around 200 throughout the
-entire exploitation training part. The below figure shows how the score changes when the agents switches from exploration to
+entire exploitation training part. Note that the Q-values are scaled due to clipping of rewards (\ref{sub2:training-algo-for-deep-q-net}). The below figure shows how the score changes when the agents switches from exploration to
 exploitation. When $\epsilon$ reaches its minimum, the score drops, which is the expected behaviour. At the beginning the agent only
 collected experiences but took mostly random actions which had at first mostly higher values than untrained network could predict.
 Throughout training steps the score started to ascend which shows that the network was learning (adjusting its weights to minimise loss
@@ -127,7 +127,7 @@ the score flattened there the Q-value kept increasing which is a sign that the n
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=12cm]{img/cumulated_qval.png}
-    \caption{Comparison of average Q-values for all architectures}
+    \includegraphics[width=11.5cm]{img/cumulated_qval.png}
+    \caption{Comparison of average Q-values for all architectures. Note that Q-values are scaled due to clipping of rewards (see \ref{sub2:training-algo-for-deep-q-net})}
     \label{fig:results-qval-comparison}
 \end{figure}

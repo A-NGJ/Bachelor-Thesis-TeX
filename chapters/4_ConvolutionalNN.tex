@@ -30,7 +30,7 @@ Figure \ref{fig:conv-example} illustrates a convolution on an 2D $4 \times 3$ ma
 \subsection{The purpose of convolution}
 \label{sub:purpose-of-convolution}
 
-Applying convolutions with different kernels, also called \emph{feature extractors}, enables do detect certain set of features from the image. The \ref{fig:conv-lenna} shows effect of applying a $3 \times 3 \times 3$ kernel
+Applying convolutions with different kernels, also called \textbf{feature extractors}, enables do detect certain set of features from the image. The \ref{fig:conv-lenna} shows effect of applying a $3 \times 3 \times 3$ kernel
 
 \begin{equation}
     K = \begin{bmatrix}
@@ -42,7 +42,7 @@ Applying convolutions with different kernels, also called \emph{feature extracto
 
 and a transposed $K^T$ on probably the most processed woman on the internet, Lenna. This particular kernel detects and apmplifies horizontal or vertical edges, but any type of kernel can be used. The next layer is usually a ReLU, which activates only for edges at a certain direction. Subsequent layers in network can activate for more complex group of features or even the entire objects like human face, cat or dog. 
 
-Another advantage of convolution layer is that it is \emph{spatially invariant}, which means that it is insensitive to feature position on a picture. If there were many objects at the same image, the feature would activate at multiple locations. What is more, the convolution network architecture encourages a parameter sharing. If the network learned to recognize an eye or a hand, it does not need to limit it to one particular type of eye (e.g. human eye). Instead the bottom layers may share patterns used to detect more abstract features in the next layers. In our example, the eye pattern can be used to detect a human, a cat or a dog.
+Another advantage of convolution layer is that it is \textbf{spatially invariant}, which means that it is insensitive to feature position on a picture. If there were many objects at the same image, the feature would activate at multiple locations. What is more, the convolution network architecture encourages a parameter sharing. If the network learned to recognize an eye or a hand, it does not need to limit it to one particular type of eye (e.g. human eye). Instead the bottom layers may share patterns used to detect more abstract features in the next layers. In our example, the eye pattern can be used to detect a human, a cat or a dog.
 
 All in all, convolution kernels combined with a deep and hierarchical structures are en extremely efficient tool for visual recognition tasks.
 
