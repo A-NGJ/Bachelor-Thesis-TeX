@@ -1,7 +1,7 @@
 \chapter{Results}
 \label{cha:results}
 
-During network training we kept track of the average score from the last $\min(N_{episodes}, 140)$ and the average predicted Q-value
+During network training track of the average score was kept from the last $\min(N_{episodes}, 140)$ and the average predicted Q-value
 for each epoch. As mentioned in the above section, there were fixed parameters and environment set for every DQN architecture. One may
 notice that number of steps differs for each algorithm. The reason behind it is that there was a maximum number of steps set yet
 episode could have finished earlier (and usually it did)  due to agent floating into illegal space. It is clear that chosen number of
@@ -36,7 +36,7 @@ and therefore find the optimal policy $\pi^*$) but did not manage to converge.
 \end{subfigure}
 \begin{subfigure}{.48\textwidth}
     \centering
-    \includegraphics[width=8cm]{img/DQNAgent_WamvNavTwoSetsBuoys-v0_normal_1127_1016_qval.png}
+    \includegraphics[width=8cm]{img/DQNAgent_WamvNavTwoSetsBuoys-v0_normal_1129_1802_qval.png}
     \caption{Average Q-value across training of DQN network}
     \label{fig:avg-qval-dqn}
 \end{subfigure}
@@ -54,11 +54,11 @@ was also far more stable. There was one drop around 30000 step, yet the agent co
 which eventually led to further score increase. The score of 800 is acquired when the agent reaches the most critical part of
 simulation track - the curve. The network has to readjust the previously learned action patterns to changeable conditions. That is why
 the score increase ratio slows down at the end. If the training was extended to greater amount of epochs the deep neural network would
-have most likely adjusted its weights to overcome this obstacle. Even in the researched scenario the frequency of agent reaching the
+have most likely adjusted its weights to overcome this obstacle. Even in the researched scenario the frequency of epochs where agent reached the
 finishing line was visibly increasing towards the end of training.
 
-The Q-value as expected is lower than in the DQN case. The underlying concept behind separating action selection from action evaluation
-was to remove overestimation of the value function. This is exactly what happened.
+The Q-value as expected is higher than in the DQN case. The underlying concept behind separating action selection from action evaluation
+was to remove overestimation of the value function. Therefore correct actions were chosen more frequently.
 
 \begin{figure}[htb]
 \begin{subfigure}{.48\textwidth}
