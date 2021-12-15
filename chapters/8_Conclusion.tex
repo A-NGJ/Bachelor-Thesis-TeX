@@ -12,7 +12,11 @@ These limitations were the greatest obstacle in a research. The hardware played 
 substantial amount of computational power to fine tune weights and biases which estimate the greedy policy the best. Therefore, without
 superb GPU it was impossible to perform a grid search to fine tune hyperparameters for every proposed architecture. What is more, the
 simulation environment itself was unstable and did not allow to train network for extended period, which might bring more detailed data
-about the performance of each deep reinforcement learning network.
+about the performance of each deep reinforcement learning network. GPU played a crucial role in the research process, therefore in order
+to improve results it would have to be replaced by a more powerful unit. The training was performed on \emph{Nvidia GTX 970} with 4GB RAM. Although it supports \emph{CUDA}, which is a cutting-edge API\footnote{Application Programming Interface} for parallel computing, the
+operating memory was insufficient. As a result, the number and size of network's layers as well as the experience replay memory size was
+hardware limited. Having a more powerful GPU, or even TPU\footnote{Tensor Processing Unit} would substantially boost training time and
+allow for more complex and memory-consuming artificial network architecture.
 
 However, even with the limited analysis resources it is clear which DQN variation is the most appropriate for a vision system. The
 combined improvements introduced in Dueling DQN and Double DQN left behind the competition. It may seem that the simple track made of

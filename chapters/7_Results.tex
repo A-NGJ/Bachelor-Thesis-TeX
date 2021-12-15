@@ -21,27 +21,36 @@ point was 2450.
 
 The Deep Q-Network training was stable, however the network learned significantly slower that other architectures. Although Q-value on
 figure \ref{fig:avg-qval-dqn} was constantly increasing, it did not project on a score which oscillated around 200 throughout the
-entire exploitation training part. Note that the Q-values are scaled due to clipping of rewards (\ref{sub2:training-algo-for-deep-q-net}). The below figure shows how the score changes when the agents switches from exploration to
+entire exploitation training part. Note that the Q-values are scaled due to clipping of rewards (chapter \ref{sub2:training-algo-for-deep-q-net}). The figure \ref{fig:dqn-results} shows how the score changes when the agents switches from exploration to
 exploitation. When $\epsilon$ reaches its minimum, the score drops, which is the expected behaviour. At the beginning the agent only
 collected experiences but took mostly random actions which had at first mostly higher values than untrained network could predict.
 Throughout training steps the score started to ascend which shows that the network was learning (adjusting its weights to minimise loss
 and therefore find the optimal policy $\pi^*$) but did not manage to converge.
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{subfigure}{.48\textwidth}
      \centering
     \includegraphics[width=8cm]{img/DQNAgent_WamvNavTwoSetsBuoys-v0_normal_1127_1016.png}
-    \caption{Average score across training of DQN network}
+    \caption{Average score across training of DQN network.}
     \label{fig:avg-score-dqn}   
 \end{subfigure}
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DQNAgent_WamvNavTwoSetsBuoys-v0_normal_1129_1802_qval.png}
-    \caption{Average Q-value across training of DQN network}
+    \caption{Average Q-value across training of DQN network.}
     \label{fig:avg-qval-dqn}
 \end{subfigure}
-\caption{DQN training results}
+\caption{DQN training results.}
 \label{fig:dqn-results}
+\end{figure}
+
+Evaluation of a trained agent (figure \ref{fig:trace-dqn}) on a track shows that the network parameters were adjusted to minimise the penalty, yet neglecting the relevance of actual reward. The boat was reluctant to take any action further towards the desired point, floating back and forwards in the vicinity of starting line instead.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10.5cm]{img/trace_dqn.png}
+    \caption{Trace of trained DQN agent across 5 episodes.}
+    \label{fig:trace-dqn}
 \end{figure}
 
 \newpage
@@ -55,25 +64,37 @@ which eventually led to further score increase. The score of 800 is acquired whe
 simulation track - the curve. The network has to readjust the previously learned action patterns to changeable conditions. That is why
 the score increase ratio slows down at the end. If the training was extended to greater amount of epochs the deep neural network would
 have most likely adjusted its weights to overcome this obstacle. Even in the researched scenario the frequency of epochs where agent reached the
-finishing line was visibly increasing towards the end of training.
+finishing line is visibly increasing towards the end of training in the figure \ref{fig:avg-score-ddqn}.
 
-The Q-value as expected is higher than in the DQN case. The underlying concept behind separating action selection from action evaluation
+The Q-value, which can be seen at figure \ref{fig:avg-qval-ddqn}, as expected is higher than in the DQN case The underlying concept behind separating action selection from action evaluation
 was to remove overestimation of the value function. Therefore correct actions were chosen more frequently.
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1126_0854.png}
-    \caption{Average score across training of Double DQN network}
+    \caption{Average score across training of Double DQN network.}
     \label{fig:avg-score-ddqn}
 \end{subfigure}
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1126_0854_qval.png}
-    \caption{Average Q-value across training of Double DQN network}
+    \caption{Average Q-value across training of Double DQN network.}
+    \label{fig:avg-qval-ddqn}
 \end{subfigure}
-\caption{Double DQN training results}
+\caption{Double DQN training results.}
 \label{fig:ddqn-results}
+\end{figure}
+
+Taking an insight into the trained agent behaviour in figure \ref{fig:trace-ddqn}, the results are significantly better that for the base
+DQN architecture. Not only did the boat tried to reach the desired position, but also reacted to the track curvature. What is more, one
+episode was successful after the boat changed direction in a proper position, which shows that the most critical point is indeed the curve. After passing it, the boat had no difficulties in reaching the finishing line.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10.5cm]{img/trace_ddqn.png}
+    \caption{Trace of trained Double DQN agent across 5 episodes.}
+    \label{fig:trace-ddqn}
 \end{figure}
 
 \newpage
@@ -84,50 +105,80 @@ was to remove overestimation of the value function. Therefore correct actions we
 Dueling network architecture was supposed to identify correctness of actions quicker than a standard DQN. Indeed the score started to raise faster
 than in DQN and even in Double DQN. The agent chose more often the more valuable action than not, which is visible as rather stable score increase
 along training with only occasional drops of low magnitude. It is worth noticing that reaching the score of 800 took 20000 less steps than for a
-previous agents. The Dueling DQN learned substantially faster which is an expected outcome. For most states the exact action choice is of little
+previous agents. The Dueling DQN learned substantially faster which is an expected outcome, shown in figure \ref{fig:results-dueling-dqn}. For most states the exact action choice is of little
 relevance as long as the agent floats towards desired point.
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DuelingDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1128_1318.png}
-    \caption{Average score across training of Dueling DQN network}
+    \caption{Average score across training of Dueling DQN network.}
     \label{fig:avg-score-dueling-dqn}
 \end{subfigure}
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DuelingDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1128_1318_qval.png}
-    \caption{Average Q-value across training of Dueling DQN network}
+    \caption{Average Q-value across training of Dueling DQN network.}
+    \label{fig:avg-qval-dueling-dqn}
 \end{subfigure}
-\caption{Dueling DQN network training results}
+\caption{Dueling DQN network training results.}
 \label{fig:results-dueling-dqn}
 \end{figure}
+
+The trained agent evaluation shows that actions were more consistent than in case of DQN or Double DQN, however the training was
+of insufficient length therefore the network did not learn to recognize curve properly. Hence the trace lines, present at figure \ref{fig:trace-dueling-dqn}, are not affected by the buyos track shape. Only at the very end it can be noticed that each line bends
+slightly towards desired point. That indicates the fact that the Dueling DQN was in a state where it learned how to stay in track,
+yet was not aware when to change direction. Had the agent been given more time, it would have with every likelihood learn when to turn
+in order to reach finishing line.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10.5cm]{img/trace_dueling_dqn.png}
+    \caption{Trace of trained Dueling DQN agent across 5 episodes.}
+    \label{fig:trace-dueling-dqn}
+\end{figure}
+
+\newpage
 
 \section{Dueling Double DQN}
 \label{sec:results-dueling-double-dqn}
 
 It was the most robust architecture among all DQNs and there is no surprise that it outperformed the competition. The score increase
 was the most stable without any significant drops. What is more, the network reached the critical point of score 800 the fastest. Although
-the score flattened there the Q-value kept increasing which is a sign that the network was learning how to pass the critical point. Given more epochs for training, the Double DDQN would with every likelihood pass this threshold.
+the score flattened there the Q-value kept increasing which is a sign that the network was learning how to pass the critical point. Given more epochs for training, the Double DDQN would with every likelihood pass this threshold. The network evaluation in figure \ref{fig:results-dddqn} is promising.
 
 \begin{figure}[htb]
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DuelingDDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1125_0937.png}
-    \caption{Average score across training of Dueling Double DQN}
+    \caption{Average score across training of Dueling Double DQN.}
     \label{fig:avg-score-dddqn}
 \end{subfigure}
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=8cm]{img/DuelingDDQNAgent_WamvNavTwoSetsBuoys-v0_normal_1125_0937_qval.png}
-    \caption{Average Q-value across training of Dueling Double DQN}
+    \caption{Average Q-value across training of Dueling Double DQN.}
 \end{subfigure}
-\caption{Dueling Double DQN training results}
+\caption{Dueling Double DQN training results.}
+\label{fig:results-dddqn}
 \end{figure}
+
+It may appear that there is only one trace in figure \ref{fig:trace-dueling-double-dqn}, but there are actually five overlapping one another. Dueling Double DQN is undoubtedly the most consistent among all architectures. However, just as in Dueling DQN case, the network
+had yet not recognized the curve properly. In fact, the trace line seems perfectly straight, which may indicate that there were far too few training epochs performed. The autonomous agent learned how to stay in track, but did not have the finest idea when to turn.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=11.5cm]{img/cumulated_qval.png}
-    \caption{Comparison of average Q-values for all architectures. Note that Q-values are scaled due to clipping of rewards (see \ref{sub2:training-algo-for-deep-q-net})}
+    \includegraphics[width=10.5cm]{img/trace_double_ddqn.png}
+    \caption{Trace of trained Dueling Double DQN agent across 5 episodes.}
+    \label{fig:trace-dueling-double-dqn}
+\end{figure}
+
+Last but not least, figure \ref{fig:results-qval-comparison} presents direct comparison of average Q-values for all evaluated DQN architectures. It is difficult to notice differences on standalone plots for each, but the aggregated plot shows clearly that Double
+Dueling DQN predicted the highest average Q-value over the course of $700$ epochs. The runner-ups were Double and Dueling DQN, leaving DQN behind. The steeper Q-value increase the faster is the network learning.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10.5cm]{img/cumulated_qval.png}
+    \caption{Comparison of average Q-values for all architectures. Note that Q-values are scaled due to clipping of rewards (see chapter \ref{sub2:training-algo-for-deep-q-net})}
     \label{fig:results-qval-comparison}
 \end{figure}

@@ -3,37 +3,43 @@
 
 The recent development in the deep learning area has resulted in a significant increase in usage of artificial intelligence
 solutions. Recommendation algorithms, voice or face recognition, type hinting - these are only examples of technologies which are
-used on a everyday basis by millions. Deep Artificial Neural Networks are by far the most robust of all machine learning
+used on everyday basis by millions. Deep Artificial Neural Networks are by far the most robust of all machine learning
 algorithms capable of handling various tasks in an unprecedented manner. Thus the choice of getting hands on designing and
 implementing vision system for an autonomous boat which uses their full potential.
 
-\section{Purpose}
+\section{Purpose and structure}
 \label{sec:purpose}
 
-The goal was to create a \textbf{vision system} for an autonomous agent which would be responsible for its autonomous control on a given
-track limited by buoys. The system uses images retrieved from a pair of front cameras to train a \textbf{Deep Reinforcement Network}
-responsible for track analysis and boat control. The entire project is held in a simulation environment where a designed algorithm is
-trained on a boat model which resembles a real life counterpart. 
+The goal of the Thesis was to create a \textbf{vision system} for an autonomous agent which would be responsible for its autonomous control
+on a given track limited by buoys. The system uses images retrieved from a pair of front cameras to train a \textbf{Deep Reinforcement
+Network} responsible for track analysis and boat control. The entire project is held in a simulation environment where a designed algorithm
+is trained on a boat model which resembles a real life counterpart. 
 
 The expected result was a well-designed and trained Deep Reinforcement Network capable of controlling the boat within defined constraints.
 Ideally the network should be tested in a real environment, however due to limited resources and time the overall performance was measured
 entirely in the simulation.
+
+This chapter contains a brief overview of Reinforcement Learning applications. The next three chapters introduce mathematical basis and
+explanation of underlying concepts of Deep Learning, Convolutional Neural Network and Reinforcement Learning respectively. The fifth
+chapter describes the Vision System project followed by research results and conclusion in chapters \ref{cha:results} and \ref{cha:conclusion}.
+
+\newpage
 
 \section{Real-life applications of Reinforcement Learning}
 \label{sec:real-life-applications-of-deep-learning}
 
 \subsection{Games}
 \label{sub:intro-games}
-RN nowadays is well-known due to algorithm which used to play different games and managed to achieve a super-human performance in some.
-The DQN agent designed by \emph{Google Deep Mind} was able to play 49 different Atari 2600 games (\ref{fig:Atari2600}). However, the most
+Reinforcement Learning nowadays is well-known due to algorithm which used to play different games and managed to achieve a super-human performance in some.
+The Deep Q-Network agent designed by \emph{Google Deep Mind} was able to play 49 different Atari 2600 games (figure \ref{fig:Atari2600}). However, the most
 famous one is probably the \emph{AlphaGo} \cite{AlphaGO}  and \emph{AlphaGo Zero}. AlphaGo was trained on countless human games achieving
 robust performance, but it was not sufficient for the researchers. They let their new agent trained from scratch - AlphaGo Zero to play with
 itself and eventually beat AlphaGo 100-0. 
 
 \begin{figure}[h]
-    \includegraphics[width=10cm]{img/Atari2600.png}
+    \includegraphics[width=12cm]{img/Atari2600.png}
     \centering
-    \caption{Reinforcement Learning model vs human-level performance in the Atari 2600 environment \cite{DQNAtari}}
+    \caption{Reinforcement Learning model vs human-level performance in the Atari 2600 environment \cite{DQNAtari}.}
     \label{fig:Atari2600}
 \end{figure}
 

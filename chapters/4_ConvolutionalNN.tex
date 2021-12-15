@@ -3,9 +3,9 @@
 
 Image recognition is a particularly challenging task. The naive approach would be to define set of features that an algorithm would recognize and then based on the results classify an object. For instance, if the task was to detect an handwritten digit, one could define set of shapes that a number can consist of. If the algorithm found double ``o'' shape it would mean that number ``8'' was recognized and so on. However, such approach fails due to the fact that there are countless variations of writing the same digit and what is more, each can be rotated or offset. It would require complex set of mappings for each and every scenario.
 
-This is the point when \textbf{Convolutional Neural Networks (CNN)} come in handy. Their ability to learn complex, high-dimensional and non-linear mappings from huge collections of samples makes them perfect candidate for digit or any image recognition tasks. The typical CNN consists of one or more of \textbf{convolution} layer followed by \textbf{activation} and \textbf{pooling} layer. This is a part where \textbf{feature extraction} and \textbf{dimension reduction} is performed. Activation function ensures the nonlinearity of the output of convolution. The example of such network, capable of recognizing hand written digits, is \emph{LeNet-5} described by \emph{Yann Lecun et al.} \cite{GradientBasedLearningDigitRec}.
+This is the point when \textbf{Convolutional Neural Networks (CNN)} come in handy. Their ability to learn complex, high-dimensional and non-linear mappings from huge collections of samples makes them perfect candidate for digit or any image recognition tasks. The typical CNN consists of one or more of \textbf{convolution} layer followed by \textbf{activation} and \textbf{pooling} layer. This is a part where \textbf{feature extraction} and \textbf{dimension reduction} is performed. Activation function ensures the nonlinearity of the output of convolution. The example of such network, capable of recognizing hand written digits, is \emph{LeNet-5} described by \emph{Yann Lecun et al.} \cite{GradientBasedLearningDigitRec} (figure \ref{fig:le-net-5}).
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=14cm]{img/LeNet-5.png}
     \caption{LeNet-5, CNN for handwritten digits recognition. Source \cite{GradientBasedLearningDigitRec}}
@@ -30,7 +30,7 @@ Figure \ref{fig:conv-example} illustrates a convolution on an 2D $4 \times 3$ ma
 \subsection{The purpose of convolution}
 \label{sub:purpose-of-convolution}
 
-Applying convolutions with different kernels, also called feature extractors, enables do detect certain set of features from the image. The \ref{fig:conv-lenna} shows effect of applying a $3 \times 3 \times 3$ kernel
+Applying convolutions with different kernels, also called feature extractors, enables do detect certain set of features from the image. The figure \ref{fig:conv-lenna} shows effect of applying a $3 \times 3 \times 3$ kernel (\ref{eq:conv-kernel})
 
 \begin{equation}
     K = \begin{bmatrix}
@@ -38,6 +38,7 @@ Applying convolutions with different kernels, also called feature extractors, en
             0 & 0 & 0 \\
             -1 & -2 & -1
         \end{bmatrix}
+    \label{eq:conv-kernel}
 \end{equation}
 
 and a transposed $K^T$ on probably the most exploited woman on the internet, Lenna. This particular kernel detects and amplifies horizontal or vertical edges, but any type of kernel can be used. The next layer is usually a ReLU, which activates only for edges at a certain direction. Subsequent layers in network can activate for more complex group of features or even the entire objects like human face, cat or dog. 
@@ -56,12 +57,12 @@ All in all, convolution kernels combined with a deep and hierarchical structures
 \section{Activation}
 \label{sec:conv-activation}
 
-CNN adopted three main activation functions: \textbf{sigmoid}, \textbf{ReLU} and \textbf{PReLU}, shown at fig. \ref{fig:conv-activation}. They have been described in \ref{sec:activation-function}, except the PReLU which is a parametric version of ReLU and is described in the appendix to this section.
+CNN adopted three main activation functions: \textbf{sigmoid}, \textbf{ReLU} and \textbf{PReLU}, shown at figure \ref{fig:conv-activation}. They have been described in a chapter \ref{sec:activation-function}, except the PReLU which is a parametric version of ReLU and is described in the appendix to this section.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=16cm, height=6cm]{img/CNN-activations.png}
-    \caption{Non-linear activations adopted by CNNs}
+    \caption{Non-linear activations adopted by CNNs.}
     \label{fig:conv-activation}
 \end{figure}
 
@@ -83,7 +84,11 @@ The function is defined as
         \end{cases}
 \end{equation}
 
-where $y_i$ is the activation input on the \emph{i-th} channel and $a_i$ is the coefficient controlling the slope of the negative part. 
+where:
+
+$y_i$ is the activation input on the \emph{i-th} channel,
+
+$a_i$ is the coefficient controlling the slope of the negative part. 
 
 \section{Pooling}
 \label{sec:conv-pooling}
@@ -96,10 +101,10 @@ Originally, pooling was performed by \textbf{subsampling} layers. Neurons receiv
     a_j = tanh\left(\beta \sum_{N \times N} a_i^{N \times N} + b \right)
 \end{equation}
 
-Recently, subsampling layer has been replaced by \textbf{max pooling} operation. It is much simpler in foundations since it only propagates the maximum of the receptive field to the next layer. Despite that, as \emph{Dominik Scherer et al.} \cite{MaxPool} showed, it is superior for capturing invariances in image data to a subsampling operations.
+Recently, subsampling layer has been replaced by \textbf{max pooling} operation. It is much simpler in foundations since it only propagates the maximum of the receptive field to the next layer. Despite that, as \emph{Dominik Scherer et al.} \cite{MaxPool} showed, it is superior for capturing invariances in image data to a subsampling operations
 
 \begin{equation}
     a_j = \max_{N \times N} \left( a_i^{N \times N} u(n, n) \right)
 \end{equation}
 
-Where $u(x, y)$ is a transfer window function. In both cases the output is a lower resolution image.
+where $u(x, y)$ is a transfer window function. In both cases the output is a lower resolution image.

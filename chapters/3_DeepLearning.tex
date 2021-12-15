@@ -1,13 +1,14 @@
 \chapter{Deep Learning}
 \label{cha:dl}
 
-Machine learning methods are used widely for regression and classification problems. Contemporary companies in order to keep up with the pace of customers expectations rely heavily on such algorithms. They require human intervention to learn. Which is possible for relatively small data sets, but gets extremely complicated or even impossible for larger ones. \textbf{Deep learning (DL)}, however, solves that issue by eliminating the need of human supervision by automating feature extraction. These algorithms can leverage from labeled data sets but do not require them to function. Together with the scalability, DL methods are by far superior to any other Artificial Inteligence solutions. This sections gives an insight of how \textbf{Deep Neural Networks (DNN)}, which are the core of DL, are created.
+Machine learning methods are used widely for regression and classification problems. Contemporary companies in order to keep up with the pace of customers expectations rely heavily on such algorithms. They require human intervention to learn. Which is possible for relatively small data sets, but gets extremely complicated or even impossible for larger ones. \textbf{Deep learning (DL)}, however, solves that issue by eliminating the need of human supervision by automating feature extraction. These algorithms can leverage from labeled data sets but do not require them to function. Together with the scalability, DL methods are by far superior to any other Artificial Intelligence solutions. This sections gives an insight of how \textbf{Deep Neural Networks (DNN)}, which are the core of DL, are created.
 
 
 \section{Neuron}
 \label{sec:neuron}
 
-Neuron is the most elementary part of the \textbf{Artificial Neural Network (ANN)}. The idea behind it was to emulate the behaviour of its biological counterpart. It consists of set of inputs $x_1, x_2, ..., x_n$ connected with digital synapses. Each of this connections is given a weight $w_1, w_2, ..., w_n$ representing an importance of the receptive inputs to the output. The output of neuron is determined by the \textbf{activation function} $\phi(x)$, which is described in more detail in the next section (\ref{sec:activation-function}). Where $x$ is the weighted sum of $\sum_j {x_j}{w_j}$ offset by bias $b$. To simplify, the weighted sum can be expressed as a dot product $x \cdot w$.
+Neuron is the most elementary part of the \textbf{Artificial Neural Network (ANN)}. The idea behind it was to emulate the behaviour of its biological counterpart. It consists of set of inputs $x_1, x_2, ..., x_n$ connected with digital synapses. Each of this connections is given a weight $w_1, w_2, ..., w_n$ representing an importance of the receptive inputs to the output. The output of neuron is determined by the \textbf{activation function} $\phi(x)$, which is described in more detail in chapter \ref{sec:activation-function}. Where $x$ is the weighted sum of $\sum_j {x_j}{w_j}$ offset by bias $b$. To simplify, the weighted sum can be expressed as a dot product $x \cdot w$.
+A simple neuron with three inputs and one output is presented in figure \ref{fig:neuron}.
 
 \begin{figure}[h]
     \centering
@@ -40,7 +41,7 @@ The most commonly used is undoubtedly the \textbf{ReLU}, which was proposed and 
 \section{General architecture of artificial neural network}
 \label{sec:general-architecture-ann}
 
-The leftmost layer of the network is called input layer and so are called the neurons that it consist of - \textbf{input neurons}. The rightmost output layer consists of, no surprise, \textbf{output neurons}. All the in-between layers are called \textbf{hidden}. At first glance, the term ``hidden'' may perhaps sound mysterious. However, there is not special meaning behind it. It could be as well called ``not an input or an output'' and be self-explanatory of what it actually is. A deep network is always made of an input, output and one or more deep layers.
+The leftmost layer of the network is called input layer and so are called the neurons that it consist of, \textbf{input neurons}. The rightmost output layer consists of, no surprise, \textbf{output neurons}. All the in-between layers are called \textbf{hidden}. At first glance, the term ``hidden'' may perhaps sound mysterious. However, there is not special meaning behind it. It could be as well called ``not an input or an output'' and be self-explanatory of what it actually is. A deep network is always made of an input, output and one or more deep layers as shown in figure \ref{fig:ann}.
 
 \begin{figure}[h]
     \centering
@@ -64,7 +65,9 @@ The \textbf{activation} (output) of the $j^{th}$ neuron in the $l^{th}$ layer is
 a^i_j = \phi\left(\sum_k (w^l_{jk} \cdot a^{l-1}_k) + b^l_j\right)
 \end{equation}
 
-where $\phi$ is the activation function,
+where:
+
+$\phi$ is the activation function,
 
 $w^l_{jk}$ is the weight from the $k^{th}$ neuron in the $(l-1)^{th}$ layer to the $j^{th}$ neuron in the $l^{th}$ layer,
 
@@ -82,7 +85,17 @@ Having explained a notation, we can discuss what the cost function actually is. 
     C(W, B, S^r, E^r)
 \end{equation}
 
-where $W$ are network's weights, $B$ biases, $S^r$ is the input of a single training sample and $E^r$ is the desired output of a single training sample.
+where:
+
+$W$ are network's weights,
+
+$B$ are biases,
+
+$S^r$ is the input of a single training sample,
+
+$E^r$ is the desired output of a single training sample.
+
+\newpage
 
 \subsubsection*{Requirements}
 \label{sub2:cost-requirements}
@@ -92,11 +105,13 @@ In order to compute gradient, which is a key part of a DNN learning process, the
 \begin{enumerate}
     \item The cost function $C$ must be able to be written as an average
     
-        \[C = \frac{1}{n} \sum_x C_x\]
+        \begin{equation}
+            C = \frac{1}{n} \sum_x C_x
+        \end{equation}
         
         over cost functions $C_x$ for individual training examples $x$.
     
-        This property allows to compute a gradient for a single training sample and run \textbf{gradient descent} (\ref{sec:gradient-descent}).
+        This property allows to compute a gradient for a single training sample and run \textbf{gradient descent} (chapter \ref{sec:gradient-descent}).
     
     \item The cost function $C$ must be independent of any activation values except the output $a^L$.
     The equation for finding the gradient for the output layer depends solely on the cost function. Only the following layers are dependent on the next layer. If $C$ was correlated with other activations, it would break the backpropagation algorithm, which will be further described.
@@ -130,7 +145,7 @@ This analogy tells what the gradient descent is all about. Applied to greater sc
 To begin with, there is a need to introduce an extremely useful mathematical tool called \textbf{gradient}, which is a vector of all partial derivatives of given function. It has a property of always pointing at the direction of the steepest ascent. So in order to find a minimum, we the negative simply needs to be calculated. For a function $C$ having $x_1, x_2, ..., x_n$ arguments the gradient would be written as 
 
 \begin{equation}
-\nabla C = \left(\frac{\partial C}{\partial x_1}, \frac{\partial C}{\partial x_2}, ..., \frac{\partial C}{\partial x_n}\right)^T
+    \nabla C = \left(\frac{\partial C}{\partial x_1}, \frac{\partial C}{\partial x_2}, ..., \frac{\partial C}{\partial x_n}\right)^T
 \end{equation}
 
 With that definition, there can be computed a step that has to be taken to move value of a function $C$ closer to the minimum:
@@ -142,8 +157,6 @@ x \longrightarrow x' = x - \eta \nabla C
 where $\eta$ is a small, positive parameter known as \textbf{learning rate}.
 
 If this process is done repeatedly, value of $C$ will be decreasing until, hopefully, the global minimum is reached. The important thing to denote is that $\eta$ has to be small enough not to overshoot, because it would cause the values of a function to diverge, which is the opposite desired outcome. To sum up, the gradient descent algorithm repeatedly computes gradient $\nabla C$ and then moves the return value of a function towards a minimum.
-
-\newpage
 
 For a neural network, a gradient descent is used to find weights $w_k$ and biases $b_l$ which minimize the cost function:
 
@@ -170,7 +183,7 @@ After the gradient decent for a batch is performed, there is another batch picke
 \section{Backpropagation}
 \label{sec:backpropagation}
 
-Before explaining how the algorithm works, let us rewrite eq. \ref{eq:2.1} to vectorized form. Vectorization is the idea of applying given function $f(x)$ to every element of the vector respectively. That is, given that $f(x) = x^3$:
+Before explaining how the algorithm works, let us rewrite (\ref{eq:2.1}) to vectorized form. Vectorization is the idea of applying given function $f(x)$ to every element of the vector respectively. That is, given that $f(x) = x^3$:
 
 \begin{equation}
     f\left(\begin{bmatrix}
@@ -191,15 +204,17 @@ Before explaining how the algorithm works, let us rewrite eq. \ref{eq:2.1} to ve
     \end{bmatrix}
 \end{equation}
 
-Having that notation in mind, the eq. \ref{eq:2.1} can be written as following:
+Having that notation in mind, the (\ref{eq:2.1}) can be written as following:
 \begin{equation}
     a^l = \phi \left(w^la^{l-1} + b^l \right)
 \end{equation}
 
-Which is much neater version of the same equation, and gives much more global perspective of how the activations of the previous layer affect the next one. It also enables to to avoid indexing hell.
-While computing activation, the intermediate value $z^l \equiv w^la^{l-1}+b^l$ is evaluated, which was also described in \ref{sec:cost-function}. It is widely used in a backpropagation so it is worth keeping that in mind.
+Which is much neater version of the same equation, and gives much more global perspective of how the activations of the previous layer
+affect the next one. It also enables to avoid writing significant amount of indexes which makes the equations clearer.
+While computing activation, the intermediate value $z^l \equiv w^la^{l-1}+b^l$ is evaluated, which was also described in chapter
+\ref{sec:cost-function}. It is widely used in a backpropagation so it is worth keeping that in mind.
 
-\vspace{.5cm}
+\vspace{.1cm}
 
 Backpropagation is all about understanding how changing weights and biases in a network affect the cost function. Eventually, it means computing partial derivatives $\frac{\partial C}{\partial w^l_{jk}}$ and $\frac{\partial C}{\partial b^l_j}$. In order to compute them, the intermediate value $\delta^l_j$ has to be introduced. It is called an \textbf{error} int the \emph{j-th} neuron of the \emph{l-th} layer and is computed in a backpropagation algorithm and then related to desired partial derivatives of weights and biases.
 
@@ -209,7 +224,7 @@ Backpropagation is all about understanding how changing weights and biases in a 
 
 The error is a measure of how the change in the weighted input of an activation function changes the cost function.
 
-There are four fundamental equations on which backpropagation is founded.
+There are four fundamental equations on which backpropagation is founded. They were described by \emph{Michael Nielsen} in \emph{``Neural network and deep learning''} \cite{NNandDL}.
 
 \subsubsection*{Error in the output layer $\delta^L$}
 \label{sub2:error-in-the-output-layer}
@@ -224,7 +239,7 @@ The components of $\delta^L$ is in form:
 
 This expression consists of two elements. First one $\frac{\partial C}{\partial a^L_j}$ tells how fast the cost is changing with respect to \emph{j-th} output activation. The latter $\phi'(z^L_j)$ tells how fast the activation function is changing at $z^L_j$.
 
-\ref{eq:bp-eq1} can be rewritten to matrix form as
+(\ref{eq:bp-eq1}) can be rewritten to matrix form as
 
 \begin{equation}
     \delta^L = \nabla_a C \odot \phi'(z^L)
@@ -245,7 +260,7 @@ Where $\nabla_a C$ is a vector of all partial derivatives $\frac{\partial C}{\pa
 
 At a first glance this equation may seem complicated, but it has an extremely intuitive interpretation. Assuming the $\delta^{l+1}$ is a known value, applying $(w^l+1)^T$ can be understood as moving the error \emph{backward} through the network, giving the measure of the output error or the \emph{l-th} layer. Taking the element-wise product with $\phi'(z^l)$ moves the error backward through the activation function of neuron in layer $l$ resulting in the error $\delta^l$ in the weighted input of layer $l$.
 
-Using \ref{eq:bp-eq1} and \ref{eq:bp-eq2} one can compute any error $\delta^l$ in the network.
+Using (\ref{eq:bp-eq1}) and (\ref{eq:bp-eq2}) one can compute any error $\delta^l$ in the network.
 
 \subsubsection*{Rate of change of the cost with respect to any bias of the network}
 \label{sub2:rate-of-change-of-the-cost-with-respect-to-every-bias-of-the-network}

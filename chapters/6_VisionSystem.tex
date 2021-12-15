@@ -1,12 +1,66 @@
 \chapter{Vision System Project}
 \label{cha:vision-system-project}
 
-Deep learning methods has reached in the recent years state-of-the-art results in many applications, e.g. image recognition, speech recognition and synthesis, natural language processing and reinforcement learning. Having in mind the results described in \ref{sub:intro-games} and the outstanding performance of the application of DQN in teaching Autonomous Driving Agent \cite{2020DuckieTown} it appeared that Autonomous Floating Agent (Boat) would be a natural step. The idea was to create a vision system using CNN (\ref{cha:conv}) + RNN (\ref{cha:reinforcement-learning}) + DNN (\ref{cha:dl}) which would be capable of routing the boat between buoys in the simple environment. Due to time and hardware limitations it was impossible test it in the real world. However, the results are promising enough to suppose that with further development it would be possible to use proposed vision system on a physical boat.
+Deep learning methods has reached in the recent years state-of-the-art results in many applications, e.g. image recognition, speech
+recognition and synthesis, natural language processing and reinforcement learning. Having in mind the results described in a chapter
+\ref{sub:intro-games} and the outstanding performance of the application of DQN in teaching Autonomous Driving Agent
+\cite{2020DuckieTown} it appeared that Autonomous Floating Agent (Boat) would be a natural step. The idea was to create a vision system
+using CNN + RNN + DNN (chapters \ref{cha:conv}, \ref{cha:reinforcement-learning}, \ref{cha:dl}) which would be capable of routing the boat
+between buoys in the simple environment. Due to time and hardware limitations it was impossible test it in the real world. However, the
+results are promising enough to suppose that with further development it would be possible to use proposed vision system on a physical
+boat.
+
+\section{Desired Environment}
+\label{sec:desired-environment}
+
+Making a simulation is a first step towards creating a real-life project. In fact, the autonomous boat is currently under
+development by \emph{AGH Solar Boat Team}. The main motivation is participation in \emph{RoboBoat
+challenge}\footnote{\url{https://roboboat.org/}} - an international student competition where teams from around the world show
+their autonomous, robotic boats which compete in navigation through a challenge course (figure \ref{fig:roboboat-challenge-course}).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10cm]{img/roboboat_course.png}
+    \caption{RoboBoat navigation challenge course.
+    Source \href{https://robonation.org/app/uploads/sites/3/2021/03/RoboBoat-2021-Rules-and-Task-Description_V1.pdf}{RoboBoat 2021 Rules}.}
+    \label{fig:roboboat-challenge-course}
+\end{figure}
+
+The main task for the boat is to float through the track limited by buoys of different colors. Aside from demonstrating
+impressive maritime manueverability, the autonomous agents would also tackle tasks that mimic real-world challenges facing
+the maritime industry. However, it is beyond the scope of the vision system project therefore simulation, which was supposed to
+resemble the challenge course, is focused only on the navigation part.
+
+The developed boat, called \emph{R.O.B.U.R}, runs on Robot Operating System (ROS) and is equipped in two rear engines and multiple sensors including
+
+\begin{itemize}
+    \item GPS,
+    \item IMU,
+    \item odometry,
+    \item front right camera,
+    \item left right camera.
+\end{itemize}
+
+However, for the purpose of the vision system only cameras and odometry were used in simulation. Whereas cameras are self-explanatory, odometry is the use of motion sensors to determine the robot's change in the position relative to some known position. In other words, it allows to retrieve $(x, y, z)$ coordinates of the boat. This in turn allows to control whether the boat is within the track or if it reached the desired position. Using only cameras and odometry allowed to simplify
+architecture of the deep reinforcement network by decreasing the size of input layer. Therefore the network learned in a faster
+pace while keeping satisfactory efficiency. The figure \ref{fig:camera-view} shows the image from a camera in a
+simulation environment designed to resemble a real-world conditions.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=16cm]{img/front_camera_image.png}
+    \caption{View from boat's camera.}
+    \label{fig:camera-view}
+\end{figure}
 
 \section{Simulation Environment}
 \label{sec:simulation-env}
 
-Before any algorithm begins to train an autonomous agent a virtual reality must be created. Virtual for us of course, for the agent it is the only world that is known. The purpose was to find simple enough environment to minimise external factors which could affect the vision system performance and simultaneously complex enough to benchmark it. Additionally, simulation had to be compatible with \textbf{Robot Operating System (ROS)} and \textbf{OpenAI Gym} used to train proposed DQN. 
+Before any algorithm begins to route an autonomous agent in a real-world, a virtual reality must be created to perform a
+training. Virtual for us of course, for the agent it is the only world that is known. The purpose was to find simple enough
+environment to minimise external factors which could affect the vision system performance and simultaneously complex enough to
+benchmark it. Additionally, simulation had to be compatible with
+\textbf{ROS} and \textbf{OpenAI Gym} used to train proposed DQN.
 
 \subsection{Gazebo}
 \label{sub:gazebo}
@@ -14,44 +68,26 @@ Before any algorithm begins to train an autonomous agent a virtual reality must 
 The simulation environment chosen for the project was \emph{Gazebo 11}\footnote{\url{https://gazebosim.org/}} - an open source robot 3D simulator.
 It is used for designing robots, offering ROS integration, performing regression testing with realistic scenarios and what is most important testing robotics algorithms. Needless to say, it perfectly satisfies project's prerequisites. Since the main purpose of the Thesis was the vision system, not the simulation environment itself, there has been chosen a \textbf{Virtual RobotX} \cite{bingham19toward} project as a starting point. It is an simulation environment, designed in coordination with RobotX\footnote{\url{https://defenceinnovationnetwork.com/robotx-challenge-2022/}} challenge organizers - the international, university-level maritime autonomous robotic systems competition. However, it required several modifications.
 
-First of all, the environment must have followed simplicity principle, hence the \emph{Sydney regatta} map was used. All obstacles were replaced with buoys which created a route for the boat, as in the following image. 
+First of all, the environment must have followed simplicity principle, hence the \emph{Sydney regatta} map was used. All obstacles were replaced with buoys which created a route for the boat, as in the figure \ref{fig:sydney-regatta-map}. 
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=16cm]{img/simulation_view.png}
-    \caption{Sydney regatta map with prepared track}
+    \caption{Sydney regatta map with prepared track.}
     \label{fig:sydney-regatta-map}
 \end{figure}
 
 The buoys create a curve to force an autonomous agent to adjust to changeable conditions. If the track was straight, the environment would present significantly less challenge for the Deep Reinforcement Network. It could possibly neglect all the propellers speed except the "float forward" instruction regardless of what images are perceived by cameras. What is more, left-side buoys are green coloured and of slightly different shape than right-side coloured red. This makes it easier for the CNN to recognize correct patterns and subsequently increases the entire vision system performance.
 
-\subsubsection*{Sensors}
-\label{sub2:sensors}
-
-The boat running on the ROS is equipped with multiple sensors, but for the purpose of reinforcement learning the following were used:
-\begin{itemize}
-    \item Front right camera,
-    \item front left camera,
-    \item odometry.
-\end{itemize}
-
-Whereas first two are self-explanatory, odometry is the use of motion sensors to determine the robot's change in the position relative to
-some known position. In other words, it allows to retrieve $(x, y, z)$ coordinates of the boat. This in turn allows to control whether
-the boat is within the track or if it reached the desired position.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=16cm]{img/front_camera_image.png}
-    \caption{View from boat's camera}
-    \label{fig:camera-view}
-\end{figure}
+\newpage
 
 \subsection{OpenAI Gym}
 \label{sub:openai-gym}
 
-OpenAI Gym\footnote{\url{https://gym.openai.com/}} is a toolkit for developing and comparing reinforcement learning algorithms. It supports multiple environments, from walking agent to playing games like \emph{Pong} or \emph{Pinball}. Running simulation with gym is straightforward. At every step an agent chooses an action, then takes a step in the environment. In return observation is received for the state $s'$, reward $R_a(s, s')$ and \emph{done} flag, which is a boolean value.
+OpenAI Gym\footnote{\url{https://gym.openai.com/}} is a toolkit for developing and comparing reinforcement learning algorithms. It supports multiple environments, from walking agent to playing games like \emph{Pong} or \emph{Pinball}. Running simulation with gym is straightforward. At every step an agent chooses an action, then takes a step in the environment. In return observation is received for the state $s'$, reward $R_a(s, s')$ and \emph{done} flag, which is a boolean value. This basic
+Gym environment implementation in Python is shown in listing \ref{lst:simple-gym-env}.
 
-\begin{lstlisting}[language=Python, caption={Example gym environment simulation}]
+\begin{lstlisting}[language=Python, caption={Example gym environment simulation}, label={lst:simple-gym-env}]
 1  env = gym.make('My-env')
 2  observaton = env.reset()
 3  for _ in range(steps):
@@ -98,20 +134,20 @@ the constraints must be followed,
 \label{eq:5.2}
 \end{equation}
 
-where $\psi$ is an offset. Otherwise the boat is considered off-track, which is an illegal space, and \emph{done} flag is set \emph{true}. After the boat passed pair of corresponding buoys, also called a \emph{checkpoint}, it cannot move backwards any further than $x^i - 3$ or the episode is terminated (done). This constraint gives an direction for the agent to follow. Additionally, maximum distance from desired point has been introduced, which cannot be greater than the largest distance of a state space. The distance is calculated as simple \emph{euclidean distance}
+where $\psi$ is an offset. Otherwise the boat is considered off-track, which is an illegal space, and \emph{done} flag is set \emph{true}. After the boat passed pair of corresponding buoys, also called a \emph{checkpoint}, it cannot move backwards any further than $x^i - 3$ or the episode is terminated (done). This constraint gives an direction for the agent to follow. Additionally, maximum distance from desired point has been introduced, which cannot be greater than the largest distance of a state space. The distance is calculated as simple \emph{euclidean distance}.
 
 \begin{equation}
     d = \sqrt{(x_1 - x_2)^2 + (y_1-y_2)^2}
 \end{equation}
 
-The goal of the simulation is to reach the desired point. If $(x_{agent}, y_{agent}) = (x_{desired}, y_{desired})$ then simulation episode finishes and \emph{done} is set \emph{true}. 
+The goal of the simulation is to reach the desired point. If $(x_{agent}, y_{agent}) = (x_{desired}, y_{desired})$ then simulation episode finishes and \emph{done} is set \emph{true}.
+
+\newpage
 
 \subsubsection*{Action Space}
 \label{sub2:action-space}
 
-The boat can take one of eight discrete actions, which are predicted by DQN algorithm.
-
-\vspace{.5cm}
+The boat can take one of eight discrete actions shown in table \ref{tab:action-space}, which are predicted by DQN algorithm.
 
 \begin{table}[h]
 \centering
@@ -129,21 +165,22 @@ The boat can take one of eight discrete actions, which are predicted by DQN algo
      7 (0.3 Left) & 0.3 & -0.3 \\
     \hline
 \end{tabular}
-\caption{Discrete actions predicted by the DQN algorithm}
+\caption{Discrete actions predicted by the DQN algorithm.}
 \label{tab:action-space}
 \end{table}
 
 \subsubsection*{Observation Space}
 \label{sub2:observation-space}
 
-Usually the observation space $O$ is just a part of the entire state space $S$. However in this particular use case the information about the relative $(x, y, z)$ location was replaced by images from cameras. The agent does not have an access to odometry information. The only way to perceive the environment is through its vision system.
+Usually the observation space $O$ is just a part of the entire state space $S$. However in this particular use case the information about
+the relative $(x, y, z)$ location was replaced by images from cameras. The agent does not have an access to odometry information. The only way to perceive the environment is through its vision system.
 
 The raw 1280x720 images are preprocessed before feeding the neural network. This step is crucial in achieving close to optimal performance, because only particular features on image are useful. In this particular case buoys are what matters. Neither the beautiful blue sky nor eye-catching azure water bring any viable information for keeping the boat inside the track. Therefore the following steps are performed:
 
 \begin{enumerate}
     \item \textbf{Cropping}
     
-    The bottom 240 pixels are removed, since they contain only redundant water and front of the boat. To get wider picture refer to fig. \ref{fig:camera-view}.
+    The bottom 240 pixels are removed, since they contain only redundant water and front of the boat. To get wider picture refer to figure \ref{fig:camera-view}.
     
     \item \textbf{Concatenation}
     
@@ -151,18 +188,20 @@ The raw 1280x720 images are preprocessed before feeding the neural network. This
     
     \item \textbf{Color segmentation}
     
-    To make it easier for the neural network to recognize important parts of an image the key colors are segmented based on their values. In order to perform that, the mask is applied which set all the pixels which are not red to 0. Pixel color is understood as the output of all RGB channels. Same operation is applied for green, because these are colors of buoys. Finally both masked out images are added resulting in the following image.
+    To make it easier for the neural network to recognize important parts of an image the key colors are segmented based on their values. In order to perform that, the mask is applied which set all the pixels which are not red to 0. Pixel color is understood as the output of all RGB channels. Same operation is applied for green, because these are colors of buoys. Finally both masked out images are added resulting in figure \ref{fig:color-segmented-image}.
     
     \begin{figure}[h]
         \centering
         \includegraphics[width=16cm]{img/image_color_segmentation.png}
-        \caption{Image after color segmentation}
+        \caption{Image after color segmentation.}
         \label{fig:color-segmented-image}
     \end{figure}
+
+\newpage
+
+    \item \textbf{Resizing}
     
-    \item{Resizing}
-    
-    Images are downscaled from the original 1280x720 resolution to 80x64. It significantly accelerates the training process while keeping all the valuable information.
+    Images are scaled down from the original 1280x720 resolution to 80x64. It significantly accelerates the training process while keeping all the valuable information.
     
     \item \textbf{Normalization}
 
@@ -180,7 +219,7 @@ Consequently, after all preprocessing steps have been performed, the observation
 
 There have been various reward systems tested. At first the agent had been rewarded with small value $R_a(s, s')$ for every step that got it closer to the desired point $(x_d, y_d)$ and punished with $-R_a(s, s')$ otherwise. If it managed to reach $(x_d, y_d)$ it was additionally rewarded with much greater \textbf{done reward} $40R_a(s, s')$ and punished with $-40R_a(s, s')$. Although the second reward is undoubtedly necessary to allow the reinforcement network distinguish between successful and unsuccessful episode, the small partial reward was confusing. There were parts of the track which forced the boat to float against the "current". That is in order not to leave the track the agent had to acquire negative rewards throughout several episodes, which was breaking the learning process at some point eventually.
 
-The new approach replaced partial step reward with checkpoint reward. Pairs of corresponding buoys are stored in a LIFO\footnote{Last in first out} list. The agent crosses the checkpoint when both \ref{eq:5.1} \& \ref{eq:5.2} are satisfied and is moving towards desired position. When it occurs, the pair of buoys is popped out from list to prevent the boat from gaining multiple rewards for crossing the same checkpoint. Altogether, the maximum reward equals 
+The new approach replaced partial step reward with checkpoint reward. Pairs of corresponding buoys are stored in a LIFO\footnote{Last in first out} list. The agent crosses the checkpoint when both (\ref{eq:5.1}) and (\ref{eq:5.2}) are satisfied and is moving towards desired position. When it occurs, the pair of buoys is popped out from list to prevent the boat from gaining multiple rewards for crossing the same checkpoint. Altogether, the maximum reward equals 
 
 \begin{equation}
 R_{max} = N \cdot R_a(s, s') + 40R_a(s, s')
@@ -193,9 +232,13 @@ Such strategy for reward distribution turned out to be effective despite its sim
 \section{Deep Reinforcement Network Architectures}
 \label{sec:dnn-architectures}
 
-There has been four deep neural network architecture evaluated, all of which base on a DQN described more in depth in section \ref{sec:deep-q-learn}. Each consecutive one was expected to present better performance, because every architecture except the core Deep Q-Network is only an extension which addresses some of know issues of the predecessor. The goal was to compare each network's performance in the same simulation scenario, for an exact set of hyperparameters derived from empirical trials. No grid search was performed owing to high computational cost. The results of such comparison are presented in the following chapter.
+There has been four deep neural network architecture evaluated, all of which base on a DQN described more in depth in chapter \ref{sec:deep-q-learn}. Each consecutive one was expected to present better performance, because every architecture except the core Deep Q-Network is only an extension which addresses some of know issues of the predecessor. The goal was to compare each network's performance in the same simulation scenario, for an exact set of hyperparameters derived from empirical trials. No grid search was performed owing to high computational cost. The results of such comparison are presented in the following chapter. 
 
-\begin{table}
+Eventually, there has been chosen the set of hyperparameters shown in the table \ref{tab:hyperparameters}. \emph{Learning rate} was already described in chapter \ref{sec:gradient-descent}; $\gamma$ is the discount factor; $\epsilon$ is responsible for exploration-exploitation balance (chapter \ref{sub:exploration-exploitation}) decreasing linearly from $1.0$ to $0.01$ over $20000$ steps; memory keeps last $12000$ transitions from which batch of size $32$ is sampled uniformly to perform a stochastic
+gradient descent; target network is replaced every $1000$ steps and maximum number of steps which agent can take in an episode
+is also $1000$.
+
+\begin{table}[h]
     \centering
     \begin{tabular}{|c c|}
         \hline
@@ -212,7 +255,7 @@ There has been four deep neural network architecture evaluated, all of which bas
         max steps & $1000$ \\
         \hline
     \end{tabular}
-    \caption{Hyperparameters used in every architecture}
+    \caption{Hyperparameters used in every architecture.}
     \label{tab:hyperparameters}
 \end{table}
 
@@ -221,8 +264,8 @@ There has been four deep neural network architecture evaluated, all of which bas
 
 This is the underlying architecture behind every network in the research. It was highly inspired by \emph{Google Deep Mind} research from 2015 \cite{DQNAtari}, which has been already mentioned in the Thesis. Although this DQN has presented outstanding performance in the Atari2600 environment it had been questionable whether same results would be observed in the Gazebo environment. There are considerably more distinct states which differ only slightly from one another. Unlike the Atari game where screens change more dynamically and contain more characteristic features.
 
-Most of the key concepts behind the implementation of Deep Q-Network, such as \emph{temporal difference}, \emph{q-value}, \emph{experience replay}, \emph{markov decision process} or \emph{bellman equation}, have been already discussed in sections \ref{sec:q-learn} and \ref{sec:deep-q-learn}.
-The issue with direct implementation of those is that reinforcement learning is known to be unstable or even to diverge when a nonlinear function approximator such as a neural network is used to represent the action-value (Q) function. These instabilities are addressed by experience replay (\ref{sub:experience-replay}) and splitting evaluation and prediction into \textbf{Evaluation Q-Network (Q-eval)} and \textbf{Target Q-Network (Q-Target)}. Whereas the first one is used to update weights using stochastic gradient descent and a loss function, the latter is used to make predictions about the next action. The action-value function $Q(s, a; \theta_i)$ is parameterized, where $\theta_i$ are the weights of the Q-network at iteration $i$. Target network is an exact copy of the evaluation network having parameters $\theta^-_i$ replaced (copied $\theta_i$ from the evaluation network) every $C$ steps and held fixed between individual updates. This approach significantly stabilises learning process.
+Most of the key concepts behind the implementation of Deep Q-Network, such as \emph{temporal difference}, \emph{q-value}, \emph{experience replay}, \emph{markov decision process} or \emph{bellman equation}, have been already discussed in chapters \ref{sec:q-learn} and \ref{sec:deep-q-learn}.
+The issue with direct implementation of those is that reinforcement learning is known to be unstable or even to diverge when a nonlinear function approximator such as a neural network is used to represent the action-value (Q) function. These instabilities are addressed by experience replay (chapter \ref{sub:experience-replay}) and splitting evaluation and prediction into \textbf{Evaluation Q-Network (Q-eval)} and \textbf{Target Q-Network (Q-Target)}. Whereas the first one is used to update weights using stochastic gradient descent and a loss function, the latter is used to make predictions about the next action. The action-value function $Q(s, a; \theta_i)$ is parameterized, where $\theta_i$ are the weights of the Q-network at iteration $i$. Target network is an exact copy of the evaluation network having parameters $\theta^-_i$ replaced (copied $\theta_i$ from the evaluation network) every $C$ steps and held fixed between individual updates. This approach significantly stabilises learning process.
 
 Experience replay $e_t = (s_t, a_t, R_{at}(s, s'), s_{t+1})$ is stored at each time step $t$ in a buffer $D_t = \{e_{\max\left(1, (t - mem\_size)\right)}, ..., e_t\}$. During learning there are updates applied on uniformly drawn samples of experience $U(D)$ of size $batch\_size$. The update means backpropagating stochastic gradient descent at iteration $i$ using the following loss
 
@@ -231,15 +274,13 @@ Experience replay $e_t = (s_t, a_t, R_{at}(s, s'), s_{t+1})$ is stored at each t
 \label{eq:deep-q-loss}
 \end{equation}
 
-Which is actually a squared, parameterized temporal difference (\ref{sub:temporal-difference-learning}).
+which is actually a squared, parameterized temporal difference (chapter \ref{sub:temporal-difference-learning}).
 
 \subsubsection*{Model Architecture}
 \label{sub2:model architecture}
 
-The architecture used takes as an input state observation (\ref{sub2:observation-space}) and returns predicted Q-values for all possible
-actions. The greatest advantage of such solution is that only one forward pass is needed to compute Q-value for every action. The input to the
-neural network consist of 5 stacked $64 \times 80$ images. There are three convolutional layers in the network, each proceeded by ReLU
-(\ref{sec:activation-function}) and max pool (\ref{sec:conv-pooling}) operations. The convolutional layers use 32, 64, 64 filters of $3 \times 3$
+The architecture used takes as an input state observation (chapter \ref{sub2:observation-space}) and returns predicted Q-values for all possible actions. The structure of DQN used in the vision system is shown in figure \ref{fig:dqn-network}. The greatest advantage of such solution is that only one forward pass is needed to compute Q-value for every action. The input to the neural network consist of 5 stacked $64 \times 80$ images. There are three convolutional layers in the network, each proceeded by ReLU
+(chapter \ref{sec:activation-function}) and max pool (chapter \ref{sec:conv-pooling}) operations. The convolutional layers use 32, 64, 64 filters of $3 \times 3$
 size. The max pool layers use $2 \times 2$ filter reducing the size of input $8$ times to $8 \times 10$. The hidden fully connected layer consist
 of 256 linear rectifier units. The output layer is a fully-connected linear layer with number of outputs representing number of actions, in our
 case $8$.
@@ -247,14 +288,16 @@ case $8$.
 \begin{figure}[h]
     \centering
     \includegraphics[width=16cm]{img/model-architecture.png}
-    \caption{DQN network used in the vision system}
+    \caption{DQN network used in the vision system.}
     \label{fig:dqn-network}
 \end{figure}
+
+\newpage
 
 \subsubsection*{Algorithm}
 \label{sub2:dqn-algorithm}
 
-The algorithm steps are nearly identical to the Q-learning (\ref{sec:q-learn}) with the exception that nonlinear approximator is used instead of a
+The algorithm steps are nearly identical to the Q-learning (chapter \ref{sec:q-learn}) with the exception that nonlinear approximator is used instead of a
 linear one. Therefore optimal action-value function is estimated as $Q(s, a; \theta) \approx Q^*(s, a)$. The neural network approximator with
 weights $\theta$ is referred as Deep Q-network. It is trained by adjusting weights $\theta_i$ at step $i$ to reduce loss function where target
 values $y = R_a(s, s') + \gamma \max_{a'}Q^*(s', a')$ are replaced by approximate target values $y = R_a(s, s') + \gamma \max_{a'}Q(s',
@@ -266,17 +309,16 @@ ensuring adequate exploration-exploitation balance while learning about the gree
 \subsubsection*{Training algorithm for Deep Q-Networks}
 \label{sub2:training-algo-for-deep-q-net}
 
-The full algorithm is presented in listing below. It uses already explained concepts as experience replay or two networks - evaluation $Q$ and
+The full algorithm is presented in listing \ref{lst:dqn-algo}. It uses already explained concepts as experience replay or two networks - evaluation $Q$ and
 target $\hat{Q}$ to make it possible to train a large ANN without diverging. In a standard Q-learning approach every update that increases $Q(s,
 a)$ also increases $Q(s', a)$ for all $a$ subsequently resulting in an increase of the target $y$. This may lead to undesired oscillations or
-divergence of the policy. Using two networks addresses this issue. Additionally, clipping the error from loss function \ref{eq:deep-q-loss}
+divergence of the policy. Using two networks addresses this issue. Additionally, clipping the error from loss function (\ref{eq:deep-q-loss})
 $\left(R_a(s, s') + \gamma \max_{a'} Q(s', a'; \theta^-_i) - Q(s, a; \theta_i) \right)$ to $[-1, 1]$ also increased the stability of the algorithm.
 
-The entire algorithm was written in \emph{Python} 3.9.7 using \emph{pytorch} 1.9.1 library. An image preprocessing part was held in
-\emp{opencv-python} 4.5.3.56. Source code with all dependencies can be found at \emph{github
+The entire algorithm was written in \emph{Python 3.9.7} using \emph{pytorch 1.9.1} library. An image preprocessing part was held in \emph{opencv-python 4.5.3.56}. Source code with all dependencies can be found at \emph{github
 repository}\footnote{\url{https://github.com/A-NGJ/bachelor_thesis}}.
 
-\begin{lstlisting}[language=Python, caption={Main algorithm loop}]
+\begin{lstlisting}[language=Python, caption={Main algorithm loop.}, label={lst:dqn-algo}]
 1  agent = Agent(**hyperparameters)
 2  agent.initialize_memory(mem_size)
 3  # initialize evaluation network with random weights
@@ -363,7 +405,7 @@ That is it! A performance boost with perhaps minimal possible change to DQN. The
 
 Dueling network architecture was first proposed by \emph{Ziyu Wang  et al.} \cite{DBLP:journals/corr/WangFL15}. It was a direct approach to 
 improve model-free RL models. The underlying idea is to separate the representation of state values $V(s)$ and state dependent action 
-advantages $A(s, a)$. Unlike DQN or DDQN it consist of two streams that represent the value and adavantage functions, as shown below.
+advantages $A(s, a)$. Unlike DQN or DDQN it consist of two streams that represent the value and adavantage functions, as shown in figure \ref{fig:single-vs-dueling-q-network}.
 
 \begin{figure}[h]
     \centering
@@ -410,9 +452,11 @@ that, the advantage function estimator can be forced to have zero advantage at t
 Now every time the advantages change as fast as the mean the above equation has the form of $Q(s, a; \theta, \alpha, \beta) = V(s; \theta,
 \beta)$. Therefore it is clear which stream provides estimate of the value function and which the estimate of the advantage function.
 
-In order to implement Dueling DQN architecture, lines 35-36 again have to be modified. This change literally replaces single fully connected layer stream with dual, remaining parts stay intact.
+In order to implement Dueling DQN architecture, lines 35-36 again have to be modified (listing \ref{lst:dueling-dqn-algo}). This change literally replaces single fully connected layer stream with dual, remaining parts stay intact.
 
-\begin{lstlisting}[language=Python, caption={Dueling Deep Q-learning modification}]
+\newpage
+
+\begin{lstlisting}[language=Python, caption={Dueling Deep Q-learning modification.}, label={lst:dueling-dqn-algo}]
 35  V_s, A_s = q_eval.forward(observations)
 36  V_s_next, A_s_next = q_target.forward(next_observations)
 37  q_pred = V_s + (A_s - mean(A_s))
@@ -437,9 +481,9 @@ results in the following target value
 
 Where $\alpha^-_i$ and $\beta^-_i$ are respectively weights of advantage and value streams from some previous step.
 
-The modification in source code, again begins at line 35 and requires little effort.
+The modification in source code, present in listing \ref{lst:double-ddqn-algo}, again begins at line 35 and requires little effort.
 
-\begin{lstlisting}[language=Python, caption={Dueling Double Deep Q-learning modification}]
+\begin{lstlisting}[language=Python, caption={Dueling Double Deep Q-learning modification.}, label={lst:double-ddqn-algo}]
 35  V_s, A_s = q_eval.forward(observations)
 36  V_s_next, A_s_next = q_target.forward(next_observations)
 37  V_s_eval, A_s_eval = q_eval.forward(next_observations)
@@ -452,14 +496,14 @@ The modification in source code, again begins at line 35 and requires little eff
 \end{lstlisting}
 
 This is the most sophisticated modification of the DQN architecture and even so it keeps most of the code unchanged. It can be said that
-the subsequent DQN network architectures (\ref{sub:double-deep-q-network}, \ref{sub:dueling-deep-q-network},
+the subsequent DQN network architectures (chapters \ref{sub:double-deep-q-network}, \ref{sub:dueling-deep-q-network},
 \ref{sub:dueling-double-deep-q-network}) follow object oriented programming principles. They inherit from well defined base and add or
 overwrite only necessary functionalities.
 
 \subsection{Training details}
 \label{sub:training-details}
 
-The training was performed in a fixed simulation environment described in \ref{sec:simulation-env}. Hyperparameters were set to values from
+The training was performed in a fixed simulation environment described in chapter \ref{sec:simulation-env}. Hyperparameters were set to values from
 table \ref{tab:hyperparameters}. They were identical for every network architecture. Each network architecture described above has been
 trained from scratch for 700 epochs keeping track of score and average Q-value along single episode. These indicators were further crucial
 in model evaluation and comparison. Due to hardware limitations it was impossible to train a model for a longer period even though it was
@@ -467,7 +511,7 @@ clear that longer training would have resulted in a better outcome. The entire t
 system errors, because the simulation environment was unstable when it was running for the extended time. Therefore tuning hyperparameters
 took considerable amount of time and for some fixtures the evaluation had to be rerun. It is unclear whether the hyperparameters proposed
 in the section are optimal, yet these are the ones for which the agent managed to acquire highest score. A grid search was not performed
-owing to high computational cost and time limitations. The final parameters base on a empirical results and architectures proposed in
+owing to high computational cost and time limitations. The final parameters base on an empirical results and architectures proposed in
 (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, \cite{DBLP:journals/corr/WangFL15}).
 
-In the experiments there was used RMSProp optimization algorithm and in the entire training there were used on average 80000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
+In the experiments there was used \emph{RMSProp} optimization algorithm and in the entire training there were used on average 80000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.

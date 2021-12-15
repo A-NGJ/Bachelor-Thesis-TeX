@@ -1,7 +1,7 @@
 \chapter{Reinforcement Learning}
 \label{cha:reinforcement-learning}
 
-Having discussed ANN and CNN it is high time to introduce third and last component used in the vision system for autonomous boat control. Reinforcement learning is a machine learning training method based on reward-penalty system. The agent is put in the environment with a defined \textbf{action space} and \textbf{state space} \ref{sub:mdp}. The agent is rewarded for taking an action which leads closer to desired state and punished with a negative reward for an undesired behaviour. Value of every action is remembered. This programs the agent to seek a long-term and maximum overall reward in order to achieve an optimal solution.
+Having discussed ANN and CNN it is high time to introduce third and last component used in the vision system for autonomous boat control. Reinforcement learning is a machine learning training method based on reward-penalty system. The agent is put in the environment with a defined \textbf{action space} and \textbf{state space}. The agent is rewarded for taking an action which leads closer to desired state and punished with a negative reward for an undesired behaviour. Value of every action is remembered. This programs the agent to seek a long-term and maximum overall reward in order to achieve an optimal solution.
 
 \section{Reinforcement Learning Methods Taxonomy}
 \label{sec:classification-of-reinforcement-learning-methods}
@@ -11,13 +11,11 @@ Before diving into details of Q-learning algorithm used in the vision system pro
 \subsection{Policy}
 \label{sub:policy}
 
-The policy is a strategy used by the agent to achieve desired goal. It dictates which action is going to be taken based on agent's state and the environment. Formally the policy $\pi(s)$, $s\in{S}$, is defined in terms of the \textbf{Markov Decision Process} (\ref{sub:mdp}) to which it refers. 
+The policy is a strategy used by the agent to achieve desired goal. It dictates which action is going to be taken based on agent's state and the environment. Formally the policy $\pi(s)$, $s\in{S}$, is defined in terms of the \textbf{Markov Decision Process} (chapter \ref{sub:mdp}) to which it refers. 
 
 \subsubsection*{Off-Policy}
 \label{sub2:off-poicy}
 
-% TODO: Q-value reference
-% TODO: Q-learning referece
 In an off-policy algorithm the agent state and the action that will be taken is evaluated regardless of the currently followed policy $\pi$. Q-learning is an example. It updates its predicted Q-values using Q-value of the next state $s'$ and the greedy action $a'$. That is, the return for state-action pairs is estimated assuming that a greedy policy was followed even though the agent is not following the greedy policy.
 
 \subsubsection*{On-Policy}
@@ -38,7 +36,7 @@ A model-free algorithm does not have to learn the model to evaluate its policy. 
 \subsubsection*{Model-Based}
 \label{sub2:model-based}
 
-A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (\ref{sub:intro-games}) is an perfect example.
+A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (chapter \ref{sub:intro-games}) is an perfect example.
 
 \subsection{Base}
 \label{sub:base}
@@ -99,10 +97,12 @@ To select an optimal action given the optimal value function $V^{*}$:
 
 This is a \textbf{greedy policy}, since the best action is always chosen based on the value function $V$.
 
+\newpage
+
 \subsection{Q-value}
 \label{sub:q-val}
 
-Q-value can be described as \emph{quality of the action} $a$. The state-action value function $Q$ becomes an decision making indicator instead of state value function $V$. This slight change has considerable consequences. Since there is no longer need to compute the value of the next state, an algorithm becomes independent to the model. That is, the agent can take a step without prior knowledge of the properties of the incoming state. The action-state equation analogous to eq. \ref{eq:state-value}:
+Q-value can be described as \emph{quality of the action} $a$. The state-action value function $Q$ becomes an decision making indicator instead of state value function $V$. This slight change has considerable consequences. Since there is no longer need to compute the value of the next state, an algorithm becomes independent to the model. That is, the agent can take a step without prior knowledge of the properties of the incoming state. The action-state equation analogous to (\ref{eq:state-value}):
 
 \begin{equation}
     Q^{*}(s, a) = \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma \max_{a'} Q^{*}(s', a') \right)
@@ -115,13 +115,14 @@ The relation between $Q$ and $V$ is given as following:
     V^{*} = \max_a \left(Q^{*} (s, a)\right)
 \end{equation}
 
-and analogously to eq. \ref{eq:state-value-policy}
+and analogously to (\ref{eq:state-value-policy})
 
 \begin{equation}
     \pi^{*}(s) = arg \max_a Q^{*}(s, a)
+    \label{eq:greedy-policy}
 \end{equation}
 
-The above equation states that the best action is the one that has the highest return from possible states resulting from taking that action.
+The equation (\ref{eq:greedy-policy}) states that the best action is the one that has the highest return from possible states resulting from taking that action.
 In other words, the agent chooses an action which leads to a state which gives the most opportunities to progress. It is like deciding between universities to apply for, assuming you are eligible for admission to every, you would perhaps choose the most prestigious one.
 
 \subsection{Exploration-exploitation}
@@ -129,7 +130,7 @@ In other words, the agent chooses an action which leads to a state which gives t
 
 The ultimate goal of a Q-learn algorithm is to obtain the optimal policy $\pi^{*}$, but the difficulty is that the model of the environment is unknown. In order to collect missing pieces of information, the agent has to \emph{explore} what is the universe that it has been put into. As interesting as it may be, exploration itself will not bring the agent closer towards finding a desired state $s$ and thus learning the optimal policy. The only way to increase a total reward is to \emph{exploit} the current knowledge about best possible actions. However, there may a better, yet unknown action which only can be discovered in the exploration process. Finding the balance between \emph{exploration} and \emph{exploitation} is crucial for every RN algorithm.
 
-The most rudimentary strategy is \emph{$\epsilon$-greedy} policy. Given the $\epsilon \in [0, 1]$, the agent takes its current best action $arg\max_a Q(s, a)$ with a probability $(1 - \epsilon)$ and a randomly selected action $a \in A$ with probability $\epsilon$. There are obviously more sophisticated strategies to balance between exploration and exploitation, but the Deep-Q-learning (\ref{sec:deep-q-learn}) algorithm used in the final project is based on this one. Therefore there is no need to introduce additional methods.
+The most rudimentary strategy is \emph{$\epsilon$-greedy} policy. Given the $\epsilon \in [0, 1]$, the agent takes its current best action $arg\max_a Q(s, a)$ with a probability $(1 - \epsilon)$ and a randomly selected action $a \in A$ with probability $\epsilon$. There are obviously more sophisticated strategies to balance between exploration and exploitation, but the Deep-Q-learning (chapter \ref{sec:deep-q-learn}) algorithm used in the final project is based on this one. Therefore there is no need to introduce additional methods.
 
 \subsection{Temporal Difference Learning}
 \label{sub:temporal-difference-learning}
@@ -138,7 +139,7 @@ This is a heart of Q-learning algorithm. One could think of two approaches of fi
 
 It was well described by \emph {Richard S. Sutton} \cite{SuttonTD} who wrote a well-depicting analogy. Suppose a weatherman wants to predict on each day of the week a weather on the following Sunday. The conventional way would be to compare the actual outcome to each prediction and then adjust each of them. On the contrary, a temporal difference approach would be to compare each day's prediction with that made on the following day. So if 50\% chance of rain is predicted on Monday, and a 75\% chance on Tuesday, a TD method increases predictions for days similar to Monday. For the Q-learning case is adjusted based on the reward and the estimated discounted value of the next state.
 
-Before diving into mathematics, let us simplify equation \ref{eq:q-value} using an alias,
+Before diving into mathematics, let us simplify (\ref{eq:q-value}) using an alias,
 
 \begin{equation}
     Q(s, a) = \sum_{s'} P_a(s, s') \left(R_a(s, s') + \gamma \max_{a'} Q(s', a') \right)
@@ -155,7 +156,7 @@ Before performing an action, there is some $Q(s, a)$ value known for a transitio
     R_a(s, s') + \gamma \max_{a'} Q(s', a')
 \end{equation}
 
-An cautious reader may notice that it is simply an above equation \ref{eq:q-learn-alias}. The detail that matters is time. First one is just an expectation and the latter a reality. Temporal difference is simply a neat way to express it,
+An cautious reader may notice that it is simply (\ref{eq:q-learn-alias}). The detail that matters is time. First one is just an expectation and the latter a reality. Temporal difference is simply a neat way to express it,
 
 \begin{equation}
     TD = R_a(s, s') + \gamma \max_{a'} Q_{t}(s', a') - Q_{t-1}(s, a)
@@ -170,11 +171,11 @@ It is directly used to update the $Q_t(s, a)$ after taking an action,
 
 The $\alpha$ factor called a \textbf{learning rate} is used because do not live in a perfect world, unless you are reading it in a distant future where all diseases are gone. The action taken might have been with some likelihood unexpected or random because of stochastic environment. Therefore, instead of replacing the old $Q_{t-1}$ with the new $Q_t(s, a)$ we update it with a pace controlled by $\alpha$.
 
-\vspace{.5cm}
+\newpage
 
-Finally, the Q-learning algorithm can be written as following,
+Finally, the Q-learning algorithm can be written as following listing \ref{lst:q-learn-algo},
 
-\begin{lstlisting}[language=Python, caption={Q-learning algorithm}]
+\begin{lstlisting}[language=Python, caption={Q-learning algorithm}, label={lst:q-learn-algo}]
 1  gamma = x
 2  alpha = y
 3  init_q_values()
@@ -192,7 +193,13 @@ Such value iteration algorithm converge to the optimal action-value function $Q^
 \section{Deep Q-learning}
 \label{sec:deep-q-learn}
 
-Q-learning appears to be a great algorithm for simple reinforcement learning tasks. However, it struggles for more complex environments. One of the reasons is that it explores too slowly and learns only from the consequent states, which may by highly correlated. Fortunately, deep neural networks come with support. Their ability to learn complex patterns comes in handy for a decision-making process in a more sophisticated environment. Instead of TD, the neural network is used to update $Q(s, a)$. The architecture of DNN is straightforward. Input layer consists of \textbf{observations} which are all the information that an agent retrieves from the environment. Then there are $N$ hidden layers and finally the output layer made of possible q-values $Q_1(s, a_1), Q_2(s, a_2), ..., Q_x(s, a_x)$, where $x$ is a number of available actions.
+Q-learning appears to be a great algorithm for simple reinforcement learning tasks. However, it struggles for more complex
+environments. One of the reasons is that it explores too slowly and learns only from the consequent states, which may by highly
+correlated. Fortunately, deep neural networks come with support. Their ability to learn complex patterns comes in handy for a
+decision-making process in a more sophisticated environment. Instead of TD, the neural network is used to update $Q(s, a)$. The
+architecture of DNN is straightforward. Input layer consists of \textbf{observations} which are all the information that an agent
+retrieves from the environment. Then there are $N$ hidden layers and finally the output layer made of possible \emph{Q-values} $Q_1(s, a_1),
+Q_2(s, a_2), ..., Q_x(s, a_x)$, where $x$ is a number of available actions.
 
 \vspace{1cm}
 
@@ -242,11 +249,20 @@ Q-learning appears to be a great algorithm for simple reinforcement learning tas
         node[right]{$q_{\i}$ vs $q_{target\i}$};
 }
 \end{tikzpicture}
-\caption{En example of simple Deep-Q-Network}
+\caption{En example of simple Deep-Q-Network.}
 \label{fig:deep-q-network}
 \end{figure}
 
-The network learns through comparison of each $q_1, q_2, ..., q_n$ with \textbf{target Q-values}. These are the values remembered from previous steps for taking an action $a$ from the same state $s_{past} = s_{current}$. Then loss\footnote{Loss and cost function are used interchangeably in most cases. Precisely a loss function is for a single training example whereas cost function is the average loss over the entire training dataset.} (\ref{sec:cost-function}) is calculated and backpropagated through the network to update all the weights and biases. An example of used loss function is \emph{Mean Squared Error} described in \ref{sub2:cost-function-examples}. Then action is selected based on chosen \textbf{action selection policy}. The most commonly used are \emph{$\epsilon$-greedy} (\ref{sub:exploration-exploitation}) or \emph{softmax}, but there have been also different policies proposed \cite{AdaptiveEGreedy}.
+\newpage
+
+The network learns through comparison of each $q_1, q_2, ..., q_n$ with \textbf{target Q-values}. These are the values remembered from
+previous steps for taking an action $a$ from the same state $s_{past} = s_{current}$. Then loss\footnote{Loss and cost function are
+used interchangeably in most cases. Precisely a loss function is for a single training example whereas cost function is the average
+loss over the entire training data set.} (chapter \ref{sec:cost-function}) is calculated and backpropagated through the network to update all
+the weights and biases. An example of used loss function is \emph{Mean Squared Error}. Then action is selected based on chosen \textbf{action selection policy}. The most commonly used are
+\emph{$\epsilon$-greedy} (chapter \ref{sub:exploration-exploitation}) or \emph{softmax}, but there have been also different policies
+proposed
+\cite{AdaptiveEGreedy}.
 
 \subsection{Experience Replay}
 \label{sub:experience-replay}
