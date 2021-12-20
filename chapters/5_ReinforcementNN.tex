@@ -36,7 +36,7 @@ A model-free algorithm does not have to learn the model to evaluate its policy. 
 \subsubsection*{Model-Based}
 \label{sub2:model-based}
 
-A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (chapter \ref{sub:intro-games}) is an perfect example.
+A model based algorithm must know the model of an environment before finding an optimal policy. Therefore a value of the next step can be predicted without actually performing that step. \mbox{AlphaGO} (chapter \ref{sub:intro-games}) is a perfect example.
 
 \subsection{Base}
 \label{sub:base}
@@ -137,7 +137,7 @@ The most rudimentary strategy is \emph{$\epsilon$-greedy} policy. Given the $\ep
 
 This is a heart of Q-learning algorithm. One could think of two approaches of finding the intermediate values $Q(s, a)$ which eventually lead to desired state $s$. First possibility is to wait until the end of an episode and reward or punish actions taken along the path. For a complex model it would require considerable amount of memory. Luckily there exists a more efficient way. Instead of sitting patiently until the very end and then act, the Q-value can be updated at every step using a \textbf{temporal difference}.
 
-It was well described by \emph {Richard S. Sutton} \cite{SuttonTD} who wrote a well-depicting analogy. Suppose a weatherman wants to predict on each day of the week a weather on the following Sunday. The conventional way would be to compare the actual outcome to each prediction and then adjust each of them. On the contrary, a temporal difference approach would be to compare each day's prediction with that made on the following day. So if 50\% chance of rain is predicted on Monday, and a 75\% chance on Tuesday, a TD method increases predictions for days similar to Monday. For the Q-learning case is adjusted based on the reward and the estimated discounted value of the next state.
+It was described by \emph {Richard S. Sutton} \cite{SuttonTD} who wrote a well-depicting analogy. Suppose a weatherman wants to predict on each day of the week a weather on the following Sunday. The conventional way would be to compare the actual outcome to each prediction and then adjust each of them. On the contrary, a temporal difference approach would be to compare each day's prediction with that made on the following day. So if 50\% chance of rain is predicted on Monday, and a 75\% chance on Tuesday, a TD method increases predictions for days similar to Monday. For the Q-learning case is adjusted based on the reward and the estimated discounted value of the next state.
 
 Before diving into mathematics, let us simplify (\ref{eq:q-value}) using an alias,
 
@@ -156,14 +156,14 @@ Before performing an action, there is some $Q(s, a)$ value known for a transitio
     R_a(s, s') + \gamma \max_{a'} Q(s', a')
 \end{equation}
 
-An cautious reader may notice that it is simply (\ref{eq:q-learn-alias}). The detail that matters is time. First one is just an expectation and the latter a reality. Temporal difference is simply a neat way to express it,
+A cautious reader may notice that it is simply (\ref{eq:q-learn-alias}). The detail that matters is time. First one is just an expectation and the latter a reality. Temporal difference is simply a neat way to express it.
 
 \begin{equation}
     TD = R_a(s, s') + \gamma \max_{a'} Q_{t}(s', a') - Q_{t-1}(s, a)
 \label{eq:temporal-difference}
 \end{equation}
 
-It is directly used to update the $Q_t(s, a)$ after taking an action,
+It is directly used to update the $Q_t(s, a)$ after taking an action.
 
 \begin{equation}
     Q_t(s, a) = Q_{t-1} + \alpha TD_t(s, a)

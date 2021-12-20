@@ -45,12 +45,12 @@ and a transposed $K^T$ on probably the most exploited woman on the internet, Len
 
 Another advantage of convolution layer is that it is \textbf{spatially invariant}, which means that it is insensitive to feature position on a picture. If there were many objects at the same image, the feature would activate at multiple locations. What is more, the convolution network architecture encourages a parameter sharing. If the network learned to recognize an eye or a hand, it does not need to limit it to one particular type of eye (e.g. human eye). Instead the bottom layers may share patterns used to detect more abstract features in the next layers. In our example, the eye pattern can be used to detect a human, a cat or a dog.
 
-All in all, convolution kernels combined with a deep and hierarchical structures are en extremely efficient tool for visual recognition tasks.
+All in all, convolution kernels combined with a deep and hierarchical structures are an extremely efficient tool for visual recognition tasks.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=16cm]{img/Lenna1.png}
-    \caption{The Lenna image and the output of different convolution kernels}
+    \caption{The Lenna image and the output of different convolution kernels.}
     \label{fig:conv-lenna}
 \end{figure}
 
@@ -66,7 +66,7 @@ CNN adopted three main activation functions: \textbf{sigmoid}, \textbf{ReLU} and
     \label{fig:conv-activation}
 \end{figure}
 
-Every of them serve clip the output of convolution. Sigmoid squashes the output into the $[0, 1]$ interval. The ReLU sets the negative values to 0 and keeps the positive unchanged. The PReLU maps larger negative values to smaller ones by reducing the slope or the mapping function. It has been shown in the experiments that removing a non-linear operation significantly decreases the performance of CNN. Their importance have been described by \emph{C.-C. Jay Kuo} \cite{kuo2016understanding}, \emph{Kaiming He et al.} \cite{he2015delving} and many others.
+Every of them serve the role of clipping the output of convolution. Sigmoid squashes the output into the $[0, 1]$ interval. The ReLU sets the negative values to 0 and keeps the positive unchanged. The PReLU maps larger negative values to smaller ones by reducing the slope or the mapping function. It has been shown in the experiments that removing a non-linear operation significantly decreases the performance of CNN. Their importance have been described by \emph{C.-C. Jay Kuo} \cite{kuo2016understanding}, \emph{Kaiming He et al.} \cite{he2015delving} and many others.
 
 
 \subsubsection*{PReLU}
@@ -101,7 +101,7 @@ Originally, pooling was performed by \textbf{subsampling} layers. Neurons receiv
     a_j = tanh\left(\beta \sum_{N \times N} a_i^{N \times N} + b \right)
 \end{equation}
 
-Recently, subsampling layer has been replaced by \textbf{max pooling} operation. It is much simpler in foundations since it only propagates the maximum of the receptive field to the next layer. Despite that, as \emph{Dominik Scherer et al.} \cite{MaxPool} showed, it is superior for capturing invariances in image data to a subsampling operations
+Recently, subsampling layer has been replaced by \textbf{max pooling} operation. It is much simpler in foundations since it only propagates the maximum of the receptive field to the next layer. Despite that, as \emph{Dominik Scherer et al.} \cite{MaxPool} showed, it is superior for capturing invariances in image data to subsampling operations
 
 \begin{equation}
     a_j = \max_{N \times N} \left( a_i^{N \times N} u(n, n) \right)

@@ -12,8 +12,15 @@ A simple neuron with three inputs and one output is presented in figure \ref{fig
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=8cm]{img/Perceptron.png}
-    \caption{A neuron. Source \cite{NNandDL}}
+    \begin{tikzpicture}
+        \node[circle, minimum size=20mm, draw=black] (Input) at (0, 0) {};
+        \foreach \i in {1, 2, 3}
+        {
+            \draw[<-, shorten <=1pt] (Input) -- ++ (-3, 2-\i) node[left]{$x_{\i}$};
+        }
+        \draw[->, shorten <= 1pt] (Input) -- ++ (2.5, 0) node[right]{output}; 
+    \end{tikzpicture}
+    \caption{A neuron.}
     \label{fig:neuron}
 \end{figure}
 
@@ -79,7 +86,7 @@ $z^l_j = \sum_k (w^l_{jk} \cdot a^{l-1}_k) + b^l_j$ is the activation value of t
 
 For more concise notation let us write $a^l = \phi(w^l a^{l-1} + b^l)$, taking advantage of matrix and vector operations.
 
-Having explained a notation, we can discuss what the cost function actually is. Briefly, it is a method of measuring of how good the neural network performed regarding given training sample and the expected output. The return of cost function is always a scalar value, since it indicates overall network performance. It can be written in a form of a following tuple
+Having explained a notation, it can be discussed what the cost function actually is. Briefly, it is a method of measuring of how good the neural network performed regarding given training sample and the expected output. The return of cost function is always a scalar value, since it indicates overall network performance. It can be written in a form of a following tuple
 
 \begin{equation}
     C(W, B, S^r, E^r)
@@ -142,7 +149,7 @@ Imagine a ball rolling down a valley. Intuitively no matter what the starting po
 
 This analogy tells what the gradient descent is all about. Applied to greater scale with multiple valleys in a higher dimensional world, but the idea behind remains unchanged. Every neural network is initialized with random weights $W$ and biases $B$, which are fine tuned until the cost function reaches its local (hopefully global) minimum. How it is actually achieved?
 
-To begin with, there is a need to introduce an extremely useful mathematical tool called \textbf{gradient}, which is a vector of all partial derivatives of given function. It has a property of always pointing at the direction of the steepest ascent. So in order to find a minimum, we the negative simply needs to be calculated. For a function $C$ having $x_1, x_2, ..., x_n$ arguments the gradient would be written as 
+To begin with, there is a need to introduce an extremely useful mathematical tool called \textbf{gradient}, which is a vector of all partial derivatives of given function. It has a property of always pointing at the direction of the steepest ascent. So in order to find a minimum, the negative simply needs to be calculated. For a function $C$ having $x_1, x_2, ..., x_n$ arguments the gradient would be written as 
 
 \begin{equation}
     \nabla C = \left(\frac{\partial C}{\partial x_1}, \frac{\partial C}{\partial x_2}, ..., \frac{\partial C}{\partial x_n}\right)^T

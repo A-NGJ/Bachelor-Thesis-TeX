@@ -77,7 +77,7 @@ First of all, the environment must have followed simplicity principle, hence the
     \label{fig:sydney-regatta-map}
 \end{figure}
 
-The buoys create a curve to force an autonomous agent to adjust to changeable conditions. If the track was straight, the environment would present significantly less challenge for the Deep Reinforcement Network. It could possibly neglect all the propellers speed except the "float forward" instruction regardless of what images are perceived by cameras. What is more, left-side buoys are green coloured and of slightly different shape than right-side coloured red. This makes it easier for the CNN to recognize correct patterns and subsequently increases the entire vision system performance.
+The buoys create a curve to force an autonomous agent to adjust to changeable conditions. If the track was straight, the environment would present significantly less challenge for the Deep Reinforcement Network. It could possibly neglect all the propellers speed except the ``float forward'' instruction regardless of what images are perceived by cameras. What is more, left-side buoys are green coloured and of slightly different shape than right-side coloured red. This makes it easier for the CNN to recognize correct patterns and subsequently increases the entire vision system's performance.
 
 \newpage
 
@@ -91,7 +91,7 @@ Gym environment implementation in Python is shown in listing \ref{lst:simple-gym
 1  env = gym.make('My-env')
 2  observaton = env.reset()
 3  for _ in range(steps):
-4      action = agent.chose_action()
+4      action = agent.choose_action()
 5      observation, reward, done = env.step(action)
 6      if done:
 7          observation = env.reset()
@@ -217,7 +217,7 @@ Consequently, after all preprocessing steps have been performed, the observation
 \subsubsection*{Reward}
 \label{sub2:reward}
 
-There have been various reward systems tested. At first the agent had been rewarded with small value $R_a(s, s')$ for every step that got it closer to the desired point $(x_d, y_d)$ and punished with $-R_a(s, s')$ otherwise. If it managed to reach $(x_d, y_d)$ it was additionally rewarded with much greater \textbf{done reward} $40R_a(s, s')$ and punished with $-40R_a(s, s')$. Although the second reward is undoubtedly necessary to allow the reinforcement network distinguish between successful and unsuccessful episode, the small partial reward was confusing. There were parts of the track which forced the boat to float against the "current". That is in order not to leave the track the agent had to acquire negative rewards throughout several episodes, which was breaking the learning process at some point eventually.
+There have been various reward systems tested. At first the agent had been rewarded with small value $R_a(s, s')$ for every step that got it closer to the desired point $(x_d, y_d)$ and punished with $-R_a(s, s')$ otherwise. If it managed to reach $(x_d, y_d)$ it was additionally rewarded with much greater \textbf{done reward} $40R_a(s, s')$ and punished with $-40R_a(s, s')$. Although the second reward is undoubtedly necessary to allow the reinforcement network distinguish between successful and unsuccessful episode, the small partial reward was confusing. There were parts of the track which forced the boat to float against the ``current''. That is in order not to leave the track the agent had to acquire negative rewards throughout several episodes, which was breaking the learning process at some point eventually.
 
 The new approach replaced partial step reward with checkpoint reward. Pairs of corresponding buoys are stored in a LIFO\footnote{Last in first out} list. The agent crosses the checkpoint when both (\ref{eq:5.1}) and (\ref{eq:5.2}) are satisfied and is moving towards desired position. When it occurs, the pair of buoys is popped out from list to prevent the boat from gaining multiple rewards for crossing the same checkpoint. Altogether, the maximum reward equals 
 
@@ -303,7 +303,7 @@ weights $\theta$ is referred as Deep Q-network. It is trained by adjusting weigh
 values $y = R_a(s, s') + \gamma \max_{a'}Q^*(s', a')$ are replaced by approximate target values $y = R_a(s, s') + \gamma \max_{a'}Q(s',
 a';\theta^-_i)$ using weights $\theta^-_i$ from some previous step.
 
-This Deep Q-learning algorithm is also an model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$
+This Deep Q-learning algorithm is also a model-free and off-policy algorithm, just as a regular Q-learning. The agent follows a policy $\pi(s)$
 ensuring adequate exploration-exploitation balance while learning about the greedy policy $\pi^*(s) = arg\max_{a'}Q(s, a'; \theta)$.
 
 \subsubsection*{Training algorithm for Deep Q-Networks}
@@ -424,7 +424,7 @@ The \textbf{advantage function} is defined as
 It measures how good is actually every action $a$ while being in state $s$. If we think of $Q(s, a)$ as a quality of each action that can be
 taken in a particular state and $V(s)$ as a actual value of given state, the difference is a pure action importance. If the action does not 
 change the state substantially it means that action is rather negligible. On the other hand, if the difference is high, the action must be
-influential. Intuitively it makes absolute sense. Taking as an example our simulation, in most of states it does not matter whether the
+influential. Intuitively it makes absolute sense. Taking as an example the developed simulation, in most of states it does not matter whether the
 agents floats slightly left or right, as long as it is not at the track edge. Note that for the greedy policy $a^* = \pi^*(s) =
 arg\max_aQ(s, a)$, it follows that $Q^*(s, a) = V^*(s, a^*)$ therefore $A(s, a^*) = 0$.
 
@@ -514,4 +514,4 @@ in the section are optimal, yet these are the ones for which the agent managed t
 owing to high computational cost and time limitations. The final parameters base on an empirical results and architectures proposed in
 (\cite{DQNAtari}, \cite{2020DuckieTown}, \cite{DBLP:journals/corr/HasseltGS15}, \cite{DBLP:journals/corr/WangFL15}).
 
-In the experiments there was used \emph{RMSProp} optimization algorithm and in the entire training there were used on average 80000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was learned from exploration and experience.
+In the experiments there was used \emph{RMSProp} optimization algorithm and in the entire training there were used on average 80000 frames. The setup used minimal amount of prior knowledge: the input data consisted only of visual images retrieved from boat's front cameras and number of actions. Everything that the agent learned was collected from exploration and experience.
